@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Notfound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Trips from "./pages/Trips";
+import Map from "./pages/Map";
 
 const useStyles = makeStyles(theme => ({
   menuButton: {marginRight: theme.spacing(2), color: 'white'},
@@ -29,6 +30,9 @@ const App: FC = () => {
           <Link className={classes.link} to='/'>
             <Button className={classes.menuButton}>Home</Button>
           </Link>
+          <Link className={classes.link} to='/map'>
+            <Button className={classes.menuButton}>Map</Button>
+          </Link>
           {user === null && (
             <Link className={classes.link} to='/login'>
               <Button className={classes.menuButton}>Login</Button>
@@ -48,13 +52,14 @@ const App: FC = () => {
       </AppBar>
 
       <main className='App'>
-        <Container maxWidth='sm'>
+        <Container>
           {/* Wait for user session */}
           {user === undefined ? (
             <CircularProgress/>
           ) : (
             <Switch>
               <Route path='/' exact component={Home}/>
+              <Route path='/map' exact component={Map}/>
               <Route path='/login' exact component={Login}/>
               <Route path='/trips' exact component={Trips}/>
               <Route component={Notfound}/>
