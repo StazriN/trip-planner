@@ -33,11 +33,6 @@ const App: FC = () => {
           <Link className={classes.link} to='/map'>
             <Button className={classes.menuButton}>Map</Button>
           </Link>
-          {user === null && (
-            <Link className={classes.link} to='/login'>
-              <Button className={classes.menuButton}>Login</Button>
-            </Link>
-          )}
           {user && (
             <>
               <Link className={classes.link} to='/trips'>
@@ -47,6 +42,11 @@ const App: FC = () => {
                 Logout
               </Button>
             </>
+          )}
+          {user === null && (
+              <Link className={classes.link} to='/login'>
+                <Button className={classes.menuButton}>Login</Button>
+              </Link>
           )}
         </Toolbar>
       </AppBar>
@@ -60,8 +60,8 @@ const App: FC = () => {
             <Switch>
               <Route path='/' exact component={Home}/>
               <Route path='/map' exact component={Map}/>
-              <Route path='/login' exact component={Login}/>
               <Route path='/trips' exact component={Trips}/>
+              <Route path='/login' exact component={Login}/>
               <Route component={Notfound}/>
             </Switch>
           )}
