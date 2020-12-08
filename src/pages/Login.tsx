@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -8,9 +8,8 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
-
 import Logo from '../assets/png/Logo.png';
-import { signIn, signUp, useLoggedInUser } from '../utils/firebase';
+import {useFirebase} from "react-redux-firebase";
 
 const Login: FC = () => {
   const [user, setUser] = useState('');
@@ -19,11 +18,14 @@ const Login: FC = () => {
   // Since firebase returns informative error messages we can show them directly
   const [error, setError] = useState<string>();
 
-  const isLoggedIn = useLoggedInUser();
+  const firebase = useFirebase();
+  const history = useHistory();
 
-  if (isLoggedIn) {
-    return <Redirect to='/' />;
-  }
+  // Sign up handler
+  const signUp = (email: string, password: string) => firebase.auth().createUserWithEmailAndPassword(email, password).then(() => {history.push("/")});
+
+  // Sign in handler
+  const signIn = (email: string, password: string) => firebase.auth().signInWithEmailAndPassword(email, password).then(() => {history.push("/")});
 
   return (
     <Card>
