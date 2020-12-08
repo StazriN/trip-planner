@@ -1,19 +1,20 @@
-import React, {FC} from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {Link, Route, BrowserRouter as Router, Switch} from 'react-router-dom';
-import {signOut, useLoggedInUser} from "./utils/firebase";
-import Button from '@material-ui/core/Button';
-import {AppBar, CircularProgress, Container, makeStyles, Toolbar} from "@material-ui/core";
+import React, { FC } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { Link, Route, BrowserRouter as Router, Switch } from "react-router-dom";
+import { signOut, useLoggedInUser } from "./utils/firebase";
+import Button from "@material-ui/core/Button";
+import { AppBar, CircularProgress, Container, makeStyles, Toolbar } from "@material-ui/core";
 import Home from "./pages/Home";
 import Notfound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Trips from "./pages/Trips";
 import Map from "./pages/Map";
+import { HeaderMenu } from "./components/HeaderMenu";
 
-const useStyles = makeStyles(theme => ({
-  menuButton: {marginRight: theme.spacing(2), color: 'white'},
-  link: {textDecoration: 'none'},
+const useStyles = makeStyles((theme) => ({
+  menuButton: { marginRight: theme.spacing(2), color: "white" },
+  link: { textDecoration: "none" },
 }));
 
 const App: FC = () => {
@@ -25,7 +26,7 @@ const App: FC = () => {
 
   return (
     <Router>
-      <AppBar position='static'>
+      {/* <AppBar position='static'>
         <Toolbar>
           <Link className={classes.link} to='/'>
             <Button className={classes.menuButton}>Home</Button>
@@ -49,26 +50,27 @@ const App: FC = () => {
               </Link>
           )}
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
+      <HeaderMenu user={user} />
 
-      <main className='App'>
+      <main className="App">
         <Container>
           {/* Wait for user session */}
           {user === undefined ? (
-            <CircularProgress/>
+            <CircularProgress />
           ) : (
             <Switch>
-              <Route path='/' exact component={Home}/>
-              <Route path='/map' exact component={Map}/>
-              <Route path='/trips' exact component={Trips}/>
-              <Route path='/login' exact component={Login}/>
-              <Route component={Notfound}/>
+              <Route path="/" exact component={Home} />
+              <Route path="/map" exact component={Map} />
+              <Route path="/trips" exact component={Trips} />
+              <Route path="/login" exact component={Login} />
+              <Route component={Notfound} />
             </Switch>
           )}
         </Container>
       </main>
     </Router>
   );
-}
+};
 
 export default App;
