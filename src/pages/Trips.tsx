@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import {useLoggedInUser, usersCollection} from "../utils/firebase";
+import {usersCollection} from "../utils/firebase";
 import {Trip} from "../utils/types";
 import InfoIcon from '@material-ui/icons/Info';
 
@@ -12,6 +12,9 @@ import {
 } from "@material-ui/core";
 import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
 import Typography from "@material-ui/core/Typography";
+import {useSelector} from "react-redux";
+import {RootState} from "../redux";
+import {isEmpty, isLoaded} from "react-redux-firebase";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,25 +38,24 @@ const Trips: FC = () => {
   const [trips, setTrips] = useState<(Trip & { id: string })[]>([]);
   const [error, setError] = useState<string>();
 
-  const user = useLoggedInUser();
+  const auth = useSelector((state: RootState) => state.firebase.auth);
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoaded(auth) || isEmpty(auth)) {
       return;
     }
 
     usersCollection
-      .doc(user.uid)
+      .doc(auth.uid)
       .collection('trips')
       .get()
       .then(
         snapshot => {
-          console.log(snapshot.docs)
           setTrips(snapshot.docs.map((doc) => ({id: doc.id, ...doc.data() as Trip})));
         },
         err => setError(err.message),
       );
-  }, [user]);
+  }, [auth]);
 
   return (
     <div className={classes.root}>

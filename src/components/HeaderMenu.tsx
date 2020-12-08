@@ -1,12 +1,13 @@
 import { AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import firebase from "firebase/app";
-import { signOut } from "../utils/firebase";
 import PersonIcon from "@material-ui/icons/Person";
 import React, { useState } from "react";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import {useSelector} from "react-redux";
+import {RootState} from "../redux";
+import {useFirebase} from "react-redux-firebase";
 
 const useStyles = makeStyles((theme) => ({
   login: {
@@ -37,11 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export interface IHeaderMenu {
-  user: firebase.User | null | undefined;
-}
-
-export const HeaderMenu: React.FC<IHeaderMenu> = (props) => {
+export const HeaderMenu: React.FC = (props) => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const windowSize = useWindowSize();
@@ -55,13 +52,20 @@ export const HeaderMenu: React.FC<IHeaderMenu> = (props) => {
     setDrawerOpen(!drawerOpen);
   };
 
+  const { uid } = useSelector((state: RootState) => state.firebase.auth);
+
+  const firebase = useFirebase();
+
+  // Sign out handler
+  const signOut = () => firebase.auth().signOut();
+
   return (
     <>
       <AppBar position="static">
         <Toolbar>
-          <Link className={classes.link} to={props.user ? "/" : "/login"}>
-            <Button className={classes.login} startIcon={<PersonIcon />} onClick={() => props.user && signOut()}>
-              {props.user ? "Logout" : "Login"}
+          <Link className={classes.link} to={uid ? "/" : "/login"}>
+            <Button className={classes.login} startIcon={<PersonIcon />} onClick={() => uid && signOut()}>
+              {uid ? "Logout" : "Login"}
             </Button>
           </Link>
           <Typography variant="h6" className={classes.title}>
@@ -102,7 +106,7 @@ export const HeaderMenu: React.FC<IHeaderMenu> = (props) => {
               <ListItemText primary={"Map"} />
             </ListItem>
           </Link>
-          {props.user && (
+          {uid && (
             <Link className={classes.link} to="/trips">
               <ListItem button key={3}>
                 <ListItemText primary={"Trips"} />
