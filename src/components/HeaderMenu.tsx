@@ -5,23 +5,28 @@ import React, { useState } from "react";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import {useSelector} from "react-redux";
-import {RootState} from "../redux";
-import {useFirebase} from "react-redux-firebase";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux";
+import { useFirebase } from "react-redux-firebase";
+import logo from "../assets/png/Logo2.png";
 
 const useStyles = makeStyles((theme) => ({
+  appBar: {
+    background: "transparent",
+    boxShadow: "none",
+  },
   login: {
     background: "transparent",
     "&:hover": {
-      background: "transparent",
-      color: "white",
+      //background: "transparent",
+      //color: "white",
     },
   },
   title: {
     flexGrow: 1,
     textAlign: "center",
   },
-  link: { textDecoration: "none" },
+  link: { textDecoration: "none", color: theme.palette.secondary.dark },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -61,21 +66,21 @@ export const HeaderMenu: React.FC = (props) => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar className={classes.appBar} position="static">
         <Toolbar>
           <Link className={classes.link} to={uid ? "/" : "/login"}>
-            <Button className={classes.login} startIcon={<PersonIcon />} onClick={() => uid && signOut()}>
+            <Button className={classes.login} color="secondary" startIcon={<PersonIcon />} onClick={() => uid && signOut()}>
               {uid ? "Logout" : "Login"}
             </Button>
           </Link>
-          <Typography variant="h6" className={classes.title}>
-            Trip planner
-          </Typography>
-          <IconButton aria-label="open drawer" edge="start" onClick={handleDrawerToggle}>
+          <div className={classes.title}></div>
+          <IconButton color="secondary" aria-label="open drawer" edge="start" onClick={handleDrawerToggle}>
             <MenuIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
+
+      {/* Drawer */}
       <Drawer
         className={classes.drawer}
         variant="persistent"
