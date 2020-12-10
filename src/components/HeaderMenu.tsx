@@ -1,14 +1,14 @@
 import { AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import PersonIcon from "@material-ui/icons/Person";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { useFirebase } from "react-redux-firebase";
-import logo from "../assets/png/Logo2.png";
+import { ExitToApp } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -45,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const HeaderMenu: React.FC = (props) => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [loginButton, setLoginButton] = useState<string | null>();
 
   const windowSize = useWindowSize();
   const drawerSize = {
@@ -57,7 +58,13 @@ export const HeaderMenu: React.FC = (props) => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const { uid } = useSelector((state: RootState) => state.firebase.auth);
+  const { uid, displayName, email } = useSelector((state: RootState) => state.firebase.auth);
+
+  const nameToDisplay = displayName ?? email;
+
+  useEffect(() => {
+    if (nameToDisplay != undefined) setLoginButton(nameToDisplay);
+  }, [uid, displayName, email]);
 
   const firebase = useFirebase();
 
@@ -68,9 +75,14 @@ export const HeaderMenu: React.FC = (props) => {
     <>
       <AppBar className={classes.appBar} position="static">
         <Toolbar>
-          <Link className={classes.link} to={uid ? "/" : "/login"}>
-            <Button className={classes.login} color="secondary" startIcon={<PersonIcon />} onClick={() => uid && signOut()}>
-              {uid ? "Logout" : "Login"}
+          {uid && (
+            <IconButton onMouseEnter={() => setLoginButton("Logout")} onMouseLeave={() => setLoginButton(nameToDisplay)} color="secondary" onClick={() => signOut()}>
+              <ExitToApp />
+            </IconButton>
+          )}
+          <Link className={classes.link} onClick={(event) => uid && event.preventDefault()} to="/login">
+            <Button className={classes.login} color="secondary" startIcon={<PersonIcon />} onClick={() => {}}>
+              {uid ? loginButton : "Login"}
             </Button>
           </Link>
           <div className={classes.title}></div>

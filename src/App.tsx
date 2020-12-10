@@ -26,6 +26,7 @@ const ourTheme = createMuiTheme({
 });
 
 const App: FC = () => {
+  console.log("App");
   return (
     <ThemeProvider theme={ourTheme}>
       <Provider store={store}>
