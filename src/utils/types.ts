@@ -1,15 +1,56 @@
 import firebase from 'firebase/app';
+import {compressAreasCoordinates} from "./helpers";
+import {LatLngTuple} from "leaflet";
 
 export type Trip = {
-    name: string;
-    date: firebase.firestore.Timestamp;
-    notes: string[];
-    areaId: number;
-    areaName: string;
-    coordinates: { lng: number; lat: number };
+  name: string;
+  date: firebase.firestore.Timestamp;
+  notes: string[];
+  areaId: number;
+  areaName: string;
+  position: { lng: number; lat: number };
 }
 
-export type User = {
-    userName: string;
-    trips: Trip[]
+export class CompressedArea {
+  data: AreaData;
+  isDownloaded: boolean = false;
+
+  constructor(data: any, isDownloaded: boolean) {
+    this.data = compressAreasCoordinates(data, 10);
+    this.isDownloaded = isDownloaded;
+  }
+}
+
+export class ClickedArea {
+  id: number;
+  name: string;
+  position: LatLngTuple;
+
+  constructor(id: number, name: string, position: LatLngTuple) {
+    this.id = id;
+    this.name = name;
+    this.position = position;
+  }
+}
+
+export enum AreasApis {
+  BIRD_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/7/query?where=1%3D1&outFields=OBJECTID,NAZEV,ROZL,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+}
+
+export type Geometry = {
+  rings: Array<Array<LatLngTuple>>
+}
+
+export type AreaFeature = {
+  attributes: {
+    OBJECTID: number,
+    NAZEV: string
+  },
+  geometry: Geometry
+}
+
+export type AreaData = {
+  features: [
+    AreaFeature
+  ]
 }

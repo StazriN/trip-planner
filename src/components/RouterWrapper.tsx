@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { CircularProgress, Container, makeStyles } from "@material-ui/core";
+import { CircularProgress, makeStyles } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import { isLoaded } from "react-redux-firebase";
 import { HeaderMenu } from "./HeaderMenu";
@@ -10,6 +10,7 @@ import Trips from "../pages/Trips";
 import Login from "../pages/Login";
 import Notfound from "../pages/NotFound";
 import Map from "../pages/Map";
+import PlanTrip from "../pages/PlanTrip";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -35,7 +36,6 @@ const RouterWrapper: FC = () => {
       <HeaderMenu />
 
       <main className={classes.main}>
-        {/* <Container> */}
         {/* Wait for user session */}
         {!isLoaded(auth) ? (
           <CircularProgress />
@@ -45,10 +45,10 @@ const RouterWrapper: FC = () => {
             <Route path="/map" exact component={Map} />
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
+            <Route path="/plan-trip" exact component={PlanTrip} />
             <Route component={Notfound} />
           </Switch>
         )}
-        {/* </Container> */}
       </main>
     </Router>
   );
