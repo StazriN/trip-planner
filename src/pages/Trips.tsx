@@ -1,5 +1,4 @@
 import React, {FC, useEffect, useState} from 'react';
-import {usersCollection} from "../utils/firebase";
 import {Trip} from "../utils/types";
 import InfoIcon from '@material-ui/icons/Info';
 
@@ -14,7 +13,7 @@ import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
 import Typography from "@material-ui/core/Typography";
 import {useSelector} from "react-redux";
 import {RootState} from "../redux";
-import {isEmpty, isLoaded} from "react-redux-firebase";
+import {useFirestore} from "react-redux-firebase";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,15 +37,14 @@ const Trips: FC = () => {
   const [trips, setTrips] = useState<(Trip & { id: string })[]>([]);
   const [error, setError] = useState<string>();
 
-  const auth = useSelector((state: RootState) => state.firebase.auth);
+  const { uid } = useSelector((state: RootState) => state.firebase.auth);
+
+  const firestore = useFirestore();
 
   useEffect(() => {
-    if (!isLoaded(auth) || isEmpty(auth)) {
-      return;
-    }
-
-    usersCollection
-      .doc(auth.uid)
+    firestore
+      .collection('users')
+      .doc(uid)
       .collection('trips')
       .get()
       .then(
@@ -55,7 +53,7 @@ const Trips: FC = () => {
         },
         err => setError(err.message),
       );
-  }, [auth]);
+  }, []);
 
   return (
     <div className={classes.root}>
