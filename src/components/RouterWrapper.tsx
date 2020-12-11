@@ -11,6 +11,7 @@ import Login from "../pages/Login";
 import Notfound from "../pages/NotFound";
 import Map from "../pages/Map";
 import PlanTrip from "../pages/PlanTrip";
+import TripDetail from "../pages/TripDetail";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -46,6 +47,7 @@ const RouterWrapper: FC = () => {
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
             <Route path="/plan-trip" exact component={PlanTrip} />
+            <Route path="/trip-detail" exact component={TripDetail} />
             <Route component={Notfound} />
           </Switch>
         )}

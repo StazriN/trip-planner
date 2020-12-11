@@ -1,16 +1,16 @@
 import firebase from 'firebase/app'
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
-import {FirebaseReducer, firebaseReducer, FirestoreReducer} from "react-redux-firebase";
+import { createStore, combineReducers, applyMiddleware } from 'redux'
+import {firebaseReducer} from "react-redux-firebase";
 import { createFirestoreInstance, firestoreReducer } from "redux-firestore";
-import {areasReducer} from "./reducers";
-import {IAreasState} from "./types";
+import {areasReducer, selectedTripReducer} from "./reducers";
 import thunk from "redux-thunk";
 
 // Add firebase to reducers
 const rootReducer = combineReducers({
   firebase: firebaseReducer,
   firestore: firestoreReducer,
-  areas: areasReducer
+  areas: areasReducer,
+  selectedTrip: selectedTripReducer
 })
 
 // Create store with reducers and initial state
