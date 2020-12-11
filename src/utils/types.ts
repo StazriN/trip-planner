@@ -3,6 +3,7 @@ import {compressAreasCoordinates} from "./helpers";
 import {LatLngTuple} from "leaflet";
 
 export type Trip = {
+  id: string;
   name: string;
   date: firebase.firestore.Timestamp;
   notes: string[];

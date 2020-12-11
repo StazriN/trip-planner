@@ -62,6 +62,11 @@ const PlanTrip: React.FC<PlanTripProps> = ({areas}) => {
         date,
         notes: [note]
       })
+      .then((docRef) => {
+        docRef.update({
+          id: docRef.id
+        })
+      })
       .then(() =>
         history.push('map')
       )

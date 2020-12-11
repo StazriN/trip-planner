@@ -12,8 +12,10 @@ import {
 import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
 import Typography from "@material-ui/core/Typography";
 import {useSelector} from "react-redux";
-import {RootState} from "../redux";
-import {useFirestore} from "react-redux-firebase";
+import {RootState, store} from "../redux";
+import {useFirestore, useFirestoreConnect} from "react-redux-firebase";
+import {useHistory} from "react-router-dom";
+import {setSelectedTripId} from "../redux/actions";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -34,26 +36,23 @@ const useStyles = makeStyles(theme => ({
 const Trips: FC = () => {
   const classes = useStyles();
 
-  const [trips, setTrips] = useState<(Trip & { id: string })[]>([]);
   const [error, setError] = useState<string>();
 
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
 
-  const firestore = useFirestore();
+  const history = useHistory();
 
-  useEffect(() => {
-    firestore
-      .collection('users')
-      .doc(uid)
-      .collection('trips')
-      .get()
-      .then(
-        snapshot => {
-          setTrips(snapshot.docs.map((doc) => ({id: doc.id, ...doc.data() as Trip})));
-        },
-        err => setError(err.message),
-      );
-  }, []);
+  useFirestoreConnect({
+    collection: `users/${uid}/trips`,
+    storeAs: "trips",
+  });
+
+  const trips: Array<Trip> = useSelector((state: RootState) => state.firestore.data.trips);
+
+  const onTripDetailClick = (id: string) => {
+    store.dispatch(setSelectedTripId(id))
+    history.push('/trip-detail')
+  }
 
   return (
     <div className={classes.root}>
@@ -61,14 +60,14 @@ const Trips: FC = () => {
           <GridListTile key="Subheader" cols={2} style={{height: 'auto'}}>
               <ListSubheader component="div" style={{color: 'white'}}>My trips</ListSubheader>
           </GridListTile>
-        {trips.map((trip) => (
+        {trips && Object.values(trips).map((trip) => (
           <GridListTile key={trip.id}>
             <img src={TripPlaceholder} alt={trip.name}/>
             <GridListTileBar
               title={trip.name}
               subtitle={<span>{trip.date?.toDate().toDateString()}</span>}
               actionIcon={
-                <IconButton aria-label={`Open ${trip.name} details`} className={classes.icon}>
+                <IconButton aria-label={`Open ${trip.name} details`} className={classes.icon} onClick={() => onTripDetailClick(trip.id)}>
                   <InfoIcon/>
                 </IconButton>
               }
