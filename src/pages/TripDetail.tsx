@@ -1,40 +1,27 @@
-import React, {ChangeEvent, FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {Trip} from "../utils/types";
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
-
 import {
   CircularProgress, Fab, Grid,
-  GridList,
-  GridListTile,
-  GridListTileBar, Icon, IconButton,
-  ListSubheader,
+  IconButton,
   makeStyles, Paper, Snackbar, TextareaAutosize, TextField
 } from "@material-ui/core";
-import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
 import Typography from "@material-ui/core/Typography";
 import {connect, useSelector} from "react-redux";
 import {RootState} from "../redux";
-import {useFirestore, useFirestoreConnect} from "react-redux-firebase";
+import {useFirestore} from "react-redux-firebase";
 import {useHistory} from "react-router-dom";
 import DatePicker from "react-datepicker";
-import {PlusOne} from "@material-ui/icons";
-import CardContent from "@material-ui/core/CardContent";
+import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 
 const useStyles = makeStyles(theme => ({
   paper: {
     color: theme.palette.secondary.main,
     width: '50%',
     padding: '30px'
-  },
-  gridList: {
-    width: 500,
-    height: 450,
-  },
-  icon: {
-    color: 'rgba(255, 255, 255, 0.54)',
   },
   loader: {position: 'fixed', left: '50%', top: '50%'},
   dateInputContainer: {
@@ -60,6 +47,9 @@ const useStyles = makeStyles(theme => ({
   fab: {
     height: '35px',
     width: '35px'
+  },
+  delete: {
+    backgroundColor: '#ff1744'
   }
 }))
 
@@ -77,7 +67,8 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
   const [name, setName] = useState<string>();
   const [date, setDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState<Array<string>>([]);
-  const [snackbarOpen, setSnackbarShown] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const firestore = useFirestore();
   const history = useHistory();
@@ -120,7 +111,7 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
         date,
         notes
       }).then(() => {
-      setSnackbarShown(true)
+      setSnackbarOpen(true)
     })
   };
 
@@ -129,6 +120,10 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
       return
     }
 
+    setConfirmDeleteOpen(true)
+  }
+
+  const onDeleteConfirm = () => {
     firestore
       .collection('users')
       .doc(uid)
@@ -138,8 +133,12 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
       .then(() => history.push('/trips'))
   }
 
+  const onDeleteCancel = () => {
+    setConfirmDeleteOpen(false)
+  }
+
   const onSnackbarClose = () => {
-    setSnackbarShown(false)
+    setSnackbarOpen(false)
   }
 
   return (
@@ -165,10 +164,10 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
           <Grid item>
             <Typography variant={'h5'} align={'left'}>Notes:</Typography>
             {notes.map((note, index) => (
-            <Grid item>
-              <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)}/>
-            </Grid>
-          ))}
+              <Grid item>
+                <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)}/>
+              </Grid>
+            ))}
           </Grid>
           {/*Add Note*/}
           <Grid item>
@@ -180,14 +179,14 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
         {/*Delete and Save*/}
         <Grid container alignItems={'flex-start'} spacing={1}>
           <Grid item>
-          <Fab onClick={onDeleteClick}>
-            <RemoveIcon/>
-          </Fab>
+            <Fab onClick={onSaveClick}>
+              <SaveIcon/>
+            </Fab>
           </Grid>
           <Grid item>
-          <Fab onClick={onSaveClick}>
-            <SaveIcon/>
-          </Fab>
+            <Fab onClick={onDeleteClick} className={classes.delete}>
+              <RemoveIcon/>
+            </Fab>
           </Grid>
         </Grid>
       </Paper>}
@@ -209,6 +208,8 @@ const TripDetail: FC<TripDetailProps> = ({selectedTrip}) => {
           </>
         }
       />
+      {/*Confirm delete dialog*/}
+      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen}/>
     </>
   );
 }
