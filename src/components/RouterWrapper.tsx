@@ -3,7 +3,7 @@ import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { CircularProgress, makeStyles } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import { isLoaded } from "react-redux-firebase";
-import { HeaderMenu } from "./HeaderMenu";
+import HeaderMenu from "./HeaderMenu";
 import { RootState } from "../redux";
 import Home from "../pages/Home";
 import Trips from "../pages/Trips";

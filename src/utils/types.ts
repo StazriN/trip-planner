@@ -1,6 +1,6 @@
-import firebase from 'firebase/app';
-import {compressAreasCoordinates} from "./helpers";
-import {LatLngTuple} from "leaflet";
+import firebase from "firebase/app";
+import { compressAreasCoordinates } from "./helpers";
+import { LatLngTuple } from "leaflet";
 
 export type Trip = {
   id: string;
@@ -10,7 +10,7 @@ export type Trip = {
   areaId: number;
   areaName: string;
   position: { lng: number; lat: number };
-}
+};
 
 export class CompressedArea {
   data: AreaData;
@@ -39,19 +39,31 @@ export enum AreasApis {
 }
 
 export type Geometry = {
-  rings: Array<Array<LatLngTuple>>
-}
+  rings: Array<Array<LatLngTuple>>;
+};
 
 export type AreaFeature = {
   attributes: {
-    OBJECTID: number,
-    NAZEV: string
-  },
-  geometry: Geometry
-}
+    OBJECTID: number;
+    NAZEV: string;
+  };
+  geometry: Geometry;
+};
 
 export type AreaData = {
-  features: [
-    AreaFeature
-  ]
+  features: [AreaFeature];
+};
+
+export class WeatherInfo {
+  areaName: string;
+  timestamp: number;
+  data: any = null;
+
+  constructor(areaName: string, timestamp: number, data: any) {
+    this.areaName = areaName;
+    this.timestamp = timestamp;
+    this.data = data;
+  }
 }
+
+export type panelContextType = "menu" | "weather";

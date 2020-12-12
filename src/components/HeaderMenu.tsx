@@ -5,10 +5,13 @@ import React, { useEffect, useState } from "react";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { useSelector } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { useFirebase } from "react-redux-firebase";
 import { ExitToApp } from "@material-ui/icons";
+import { store } from "../redux";
+import { setRightPanelContext } from "../redux/actions";
+import { panelContextType } from "../utils/types";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -43,19 +46,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const HeaderMenu: React.FC = (props) => {
+const mapStateToProps = ({ navigation }: RootState) => {
+  return { navigation };
+};
+
+type HeaderMenuProps = ReturnType<typeof mapStateToProps> & {};
+
+const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [loginButton, setLoginButton] = useState<string | null>();
 
   const windowSize = useWindowSize();
   const drawerSize = {
-    width: windowSize.width != undefined && windowSize.width > 500 ? 300 : windowSize.width,
+    width: windowSize.width !== undefined && windowSize.width > 500 ? 300 : windowSize.width,
     //height: windowSize.height != undefined && windowSize.height > 500 ? 300 : windowSize.height,
   };
   const classes = useStyles(drawerSize);
 
   const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
+    var [context, open]: [panelContextType, boolean] = ["menu", true];
+    if (props.navigation.panelOpened) [context, open] = [props.navigation.panelContext, false];
+    store.dispatch(setRightPanelContext(context, open));
   };
 
   const { uid, displayName, email } = useSelector((state: RootState) => state.firebase.auth);
@@ -63,7 +74,7 @@ export const HeaderMenu: React.FC = (props) => {
   const nameToDisplay = displayName ?? email;
 
   useEffect(() => {
-    if (nameToDisplay != undefined) setLoginButton(nameToDisplay);
+    if (nameToDisplay !== undefined) setLoginButton(nameToDisplay);
   }, [uid, displayName, email]);
 
   const firebase = useFirebase();
@@ -97,7 +108,7 @@ export const HeaderMenu: React.FC = (props) => {
         className={classes.drawer}
         variant="persistent"
         anchor="right"
-        open={drawerOpen}
+        open={props.navigation.panelOpened}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
         }}
@@ -112,26 +123,32 @@ export const HeaderMenu: React.FC = (props) => {
         </div>
         <Divider />
         {/* TODO napisat lepsie */}
-        <List>
-          <Link className={classes.link} to="/">
-            <ListItem button key={1}>
-              <ListItemText primary={"Home"} />
-            </ListItem>
-          </Link>
-          <Link className={classes.link} to="/map">
-            <ListItem button key={2}>
-              <ListItemText primary={"Map"} />
-            </ListItem>
-          </Link>
-          {uid && (
-            <Link className={classes.link} to="/trips">
-              <ListItem button key={3}>
-                <ListItemText primary={"Trips"} />
+        {props.navigation.panelContext === "menu" ? (
+          <List>
+            <Link className={classes.link} to="/">
+              <ListItem button key={1}>
+                <ListItemText primary={"Home"} />
               </ListItem>
             </Link>
-          )}
-        </List>
+            <Link className={classes.link} to="/map">
+              <ListItem button key={2}>
+                <ListItemText primary={"Map"} />
+              </ListItem>
+            </Link>
+            {uid && (
+              <Link className={classes.link} to="/trips">
+                <ListItem button key={3}>
+                  <ListItemText primary={"Trips"} />
+                </ListItem>
+              </Link>
+            )}
+          </List>
+        ) : (
+          <h5>Weather</h5>
+        )}
       </Drawer>
     </>
   );
 };
+
+export default connect(mapStateToProps, {})(HeaderMenu);
