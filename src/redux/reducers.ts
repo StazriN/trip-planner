@@ -5,6 +5,11 @@ import { WeatherInfo } from "../utils/types";
 const areasInitial: IAreasState = {
   isDownloading: false,
   birdAreas: undefined,
+  largeProtectedAreas: undefined,
+  smallAreas: undefined,
+  euAreas: undefined,
+  geoparks: undefined,
+  bioAreas: undefined,
   clickedArea: undefined,
 };
 
@@ -13,6 +18,31 @@ export function areasReducer(state: IAreasState = areasInitial, action: Actions)
     case ActionStrings.BIRD_AREAS_DOWNLOADED:
       return Object.assign({}, state, {
         birdAreas: action.payload,
+        isDownloading: false,
+      });
+    case ActionStrings.LARGE_PROTECTED_AREAS_DOWNLOADED:
+      return Object.assign({}, state, {
+        largeProtectedAreas: action.payload,
+        isDownloading: false,
+      });
+    case ActionStrings.SMALL_AREAS_DOWNLOADED:
+      return Object.assign({}, state, {
+        smallAreas: action.payload,
+        isDownloading: false,
+      });
+    case ActionStrings.EU_AREAS_DOWNLOADED:
+      return Object.assign({}, state, {
+        euAreas: action.payload,
+        isDownloading: false,
+      });
+    case ActionStrings.GEOPARKS_DOWNLOADED:
+      return Object.assign({}, state, {
+        geoparks: action.payload,
+        isDownloading: false,
+      });
+    case ActionStrings.BIO_AREAS_DOWNLOADED:
+      return Object.assign({}, state, {
+        bioAreas: action.payload,
         isDownloading: false,
       });
     case ActionStrings.SET_DOWNLOADING:
@@ -48,8 +78,8 @@ export function selectedTripReducer(state: ISelectedTripState = selectedTripInit
 /*************************************************** WEATHER ************************************************************/
 
 const weatherInit: IWeatherState = {
-  displayedLocation: "Blaník",
-  displayedLocationCoordinates: { lng: 0, lat: 0 },
+  displayedLocation: { name: "Blaník", id: NaN },
+  displayedLocationCoordinates: [0, 0],
   cityData: [],
 };
 
@@ -59,17 +89,18 @@ export function weatherReducer(state: IWeatherState = weatherInit, action: Actio
       return Object.assign({}, state, {
         cityData: [new WeatherInfo(action.payload.areaName, new Date().getTime(), action.payload.data), ...state.cityData],
       });
-    case ActionStrings.SET_LOCATION:
+    case ActionStrings.SET_WEATHER_LOCATION:
+      console.log(action.payload);
       return Object.assign({}, state, {
-        displayedLocation: action.payload.areaName,
-        displayedLocationCoordinates: { lng: action.payload.lng, lat: action.payload.lat },
+        displayedLocation: { name: action.payload.areaName, id: action.payload.id },
+        displayedLocationCoordinates: [...action.payload.LatLng],
       });
     default:
       return state;
   }
 }
 
-/*************************************************** WEATHER ************************************************************/
+/*************************************************** NAVIGATION ************************************************************/
 
 const navigationInit: INavigationState = {
   panelContext: "menu",

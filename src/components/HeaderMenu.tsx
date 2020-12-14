@@ -11,7 +11,8 @@ import { useFirebase } from "react-redux-firebase";
 import { ExitToApp } from "@material-ui/icons";
 import { store } from "../redux";
 import { setRightPanelContext } from "../redux/actions";
-import { panelContextType } from "../utils/types";
+import { AreaType, MenuItemsType, panelContextType } from "../utils/types";
+import WeatherWidget from "./WeatherWidget";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -53,7 +54,6 @@ const mapStateToProps = ({ navigation }: RootState) => {
 type HeaderMenuProps = ReturnType<typeof mapStateToProps> & {};
 
 const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
-  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [loginButton, setLoginButton] = useState<string | null>();
 
   const windowSize = useWindowSize();
@@ -70,17 +70,25 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   };
 
   const { uid, displayName, email } = useSelector((state: RootState) => state.firebase.auth);
-
   const nameToDisplay = displayName ?? email;
 
   useEffect(() => {
     if (nameToDisplay !== undefined) setLoginButton(nameToDisplay);
-  }, [uid, displayName, email]);
+  }, [uid, displayName, nameToDisplay, email]);
 
   const firebase = useFirebase();
-
   // Sign out handler
   const signOut = () => firebase.auth().signOut();
+
+  //
+  const menuList: MenuItemsType = {
+    birdAreas: "Bird Areas",
+    largeProtectedAreas: "Large Protected Areas",
+    smallAreas: "Small Areas",
+    euAreas: "Eu Areas",
+    geoparks: "Geoparks",
+    bioAreas: "Bio Areas",
+  };
 
   return (
     <>
@@ -130,21 +138,26 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
                 <ListItemText primary={"Home"} />
               </ListItem>
             </Link>
-            <Link className={classes.link} to="/map">
-              <ListItem button key={2}>
-                <ListItemText primary={"Map"} />
-              </ListItem>
-            </Link>
             {uid && (
-              <Link className={classes.link} to="/trips">
-                <ListItem button key={3}>
-                  <ListItemText primary={"Trips"} />
+              <>
+                <Link className={classes.link} to="/trips">
+                  <ListItem button key={2}>
+                    <ListItemText primary={"Trips"} />
+                  </ListItem>
+                </Link>
+                <Divider />
+              </>
+            )}
+            {Object.keys(menuList).map((key, index) => (
+              <Link className={classes.link} to={`/map/${key}`}>
+                <ListItem button key={index + 3}>
+                  <ListItemText primary={menuList[key as AreaType]} />
                 </ListItem>
               </Link>
-            )}
+            ))}
           </List>
         ) : (
-          <h5>Weather</h5>
+          <WeatherWidget />
         )}
       </Drawer>
     </>

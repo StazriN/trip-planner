@@ -43,7 +43,7 @@ const RouterWrapper: FC = () => {
         ) : (
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/map" exact component={Map} />
+            <Route path="/map/:areaType" exact render={({match}) => <Map areaType={match.params.areaType}/>}/>
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
             <Route path="/plan-trip" exact component={PlanTrip} />

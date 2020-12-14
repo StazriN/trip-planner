@@ -1,5 +1,6 @@
-import { IAreasState } from "../redux/types";
-import { CompressedArea } from "./types";
+import { LatLngTuple } from "leaflet";
+import { ActionStrings } from "../redux/types";
+import { AreasApis, AreaType, Geometry } from "./types";
 
 export const compressAreasCoordinates = (data: any, takeEvery: number) => {
   if (data?.features?.length > 0) {
@@ -19,16 +20,9 @@ export const compressAreasCoordinates = (data: any, takeEvery: number) => {
   return data;
 };
 
-export const findMeCenter = (stateData: IAreasState, typeOfArea: keyof IAreasState, areaID: number | undefined) => {
-  const areaGeomData = stateData[typeOfArea] as CompressedArea;
-  const features = areaGeomData?.data?.features;
-  if (!features) return { lng: 0, lat: 0 };
-
-  const objective = features.filter((feature) => feature.attributes.OBJECTID === areaID)[0];
-  if (!objective) return { lng: 0, lat: 0 };
-
+export const findMeCenter = (data: Geometry) => {
   var [minX, minY, maxX, maxY] = [100000, 100000, 0, 0];
-  const ring = objective.geometry.rings[0];
+  const ring = data.rings[0];
 
   ring.forEach((tuple) => {
     minX = minX > tuple[0] ? tuple[0] : minX;
@@ -37,7 +31,25 @@ export const findMeCenter = (stateData: IAreasState, typeOfArea: keyof IAreasSta
     maxY = maxY < tuple[1] ? tuple[1] : maxY;
   });
 
-  const result = { lng: (minX + maxX) / 2, lat: (minY + maxY) / 2 };
-  console.log(objective.attributes.NAZEV, result);
+  // const result = { lat: (minY + maxY) / 2, lng: (minX + maxX) / 2,  };
+  const result: LatLngTuple = [(minY + maxY) / 2, (minX + maxX) / 2];
+  console.log(result);
   return result;
+};
+
+export const getEndpoint = (area: AreaType) => {
+  switch (area) {
+    case "birdAreas":
+      return [AreasApis.BIRD_AREAS, ActionStrings.BIRD_AREAS_DOWNLOADED];
+    case "bioAreas":
+      return [AreasApis.BIO_AREAS, ActionStrings.BIO_AREAS_DOWNLOADED];
+    case "euAreas":
+      return [AreasApis.EU_AREAS, ActionStrings.EU_AREAS_DOWNLOADED];
+    case "geoparks":
+      return [AreasApis.GEOPARKS, ActionStrings.GEOPARKS_DOWNLOADED];
+    case "largeProtectedAreas":
+      return [AreasApis.LARGE_PROTECTED_AREAS, ActionStrings.LARGE_PROTECTED_AREAS_DOWNLOADED];
+    case "smallAreas":
+      return [AreasApis.SMALL_AREAS, ActionStrings.SMALL_AREAS_DOWNLOADED];
+  }
 };

@@ -1,11 +1,32 @@
 import { action } from "typesafe-actions";
 import { ActionStrings } from "./types";
 import { ClickedArea, panelContextType } from "../utils/types";
+import { LatLngTuple } from "leaflet";
 
 /*************************************************** AREAS ************************************************************/
 
 export function storeBirdAreas() {
   return action(ActionStrings.BIRD_AREAS_DOWNLOADED, {});
+}
+
+export function storeLargeProtectedAreas() {
+  return action(ActionStrings.LARGE_PROTECTED_AREAS_DOWNLOADED, {});
+}
+
+export function storeSmallAreas() {
+  return action(ActionStrings.SMALL_AREAS_DOWNLOADED, {});
+}
+
+export function storeEuAreas() {
+  return action(ActionStrings.EU_AREAS_DOWNLOADED, {});
+}
+
+export function storeGeoparks() {
+  return action(ActionStrings.GEOPARKS_DOWNLOADED, {});
+}
+
+export function storeBioAreas() {
+  return action(ActionStrings.BIO_AREAS_DOWNLOADED, {});
 }
 
 export function setDownloading() {
@@ -28,8 +49,8 @@ export function downloadWeather(data: any, areaName: string) {
   return action(ActionStrings.DOWNLOAD_WEATHER, { data, areaName });
 }
 
-export function setLocation(areaName: string, lng: number, lat: number) {
-  return action(ActionStrings.SET_LOCATION, { areaName, lng, lat });
+export function setWeatherLocation(areaName: string, id: number, LatLng: LatLngTuple) {
+  return action(ActionStrings.SET_WEATHER_LOCATION, { areaName, id, LatLng });
 }
 
 /*************************************************** WEATHER ************************************************************/

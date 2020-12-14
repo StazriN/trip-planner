@@ -36,6 +36,11 @@ export class ClickedArea {
 
 export enum AreasApis {
   BIRD_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/7/query?where=1%3D1&outFields=OBJECTID,NAZEV,ROZL,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+  LARGE_PROTECTED_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/0/query?where=1%3D1&outFields=OBJECTID,NAZEV,ROZL,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+  GEOPARKS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/10/query?where=1%3D1&outFields=OBJECTID,NAZEV_GP,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+  EU_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/6/query?where=1%3D1&outFields=OBJECTID,NAZEV,ROZL,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+  SMALL_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/2/query?where=1%3D1&outFields=OBJECTID,NAZEV,ROZL,SHAPE,SHAPE.AREA&outSR=4326&f=json",
+  BIO_AREAS = "https://gis.nature.cz/arcgis/rest/services/Aplikace/Opendata/MapServer/8/query?where=1%3D1&outFields=OBJECTID,NAZEV_BR,SHAPE,SHAPE.AREA&outSR=4326&f=json",
 }
 
 export type Geometry = {
@@ -67,3 +72,7 @@ export class WeatherInfo {
 }
 
 export type panelContextType = "menu" | "weather";
+
+export type AreaType = "birdAreas" | "largeProtectedAreas" | "smallAreas" | "euAreas" | "geoparks" | "bioAreas";
+
+export type MenuItemsType = Record<AreaType, string>;

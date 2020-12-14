@@ -1,5 +1,5 @@
 import { connect, useSelector } from "react-redux";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useHistory } from "react-router-dom";
@@ -12,6 +12,8 @@ import { CardActions, TextareaAutosize } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import { useFirestore } from "react-redux-firebase";
 import { setRightPanelContext } from "../redux/actions";
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const mapStateToProps = ({ areas }: RootState) => {
   return { areas };
@@ -29,7 +31,7 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
 
   const handleClose = () => {
-    history.push("/map");
+    // TODO
   };
 
   const onDateChange = (date: Date | null) => {
@@ -77,25 +79,33 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
 
   return (
     <>
-      <Card>
+      <Card style={{ height: "100%" }}>
         <CardContent>
-          <Typography variant="h5" component="h1">
-            Plan your trip
+          <Typography color="secondary" variant="h6" component="h1">
+            Plan your trip to:
           </Typography>
-          <Typography variant="h6">{areas.clickedArea?.name}</Typography>
+          <Typography color="secondary" variant="h5">
+            {areas.clickedArea?.name}
+          </Typography>
           <TextField label="Name" name="name" fullWidth margin="normal" variant="outlined" value={name} onChange={onNameChange} />
-          <Typography variant="subtitle2" align="left">
-            Date
-          </Typography>
-
-          <DatePicker selected={date} onChange={onDateChange} />
-          <br />
-          <br />
-          <Typography variant="subtitle2" align="left" paragraph={true}>
-            Note
-          </Typography>
-          <TextareaAutosize aria-label="empty textarea" placeholder="Empty" value={note} onChange={onNoteChange} />
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              fullWidth
+              margin="normal"
+              inputVariant="outlined"
+              id="date-picker-dialog"
+              label="Date picker dialog"
+              format="MM/dd/yyyy"
+              value={date}
+              onChange={onDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change date",
+              }}
+            />
+          </MuiPickersUtilsProvider>
+          <TextField variant="outlined" id="standard-multiline-flexible" label="Note" multiline fullWidth rowsMax={4} value={note} onChange={onNoteChange} />
         </CardContent>
+
         <CardActions>
           <Button onClick={handleClose}>Close</Button>
           <Button onClick={submit}>Submit</Button>
