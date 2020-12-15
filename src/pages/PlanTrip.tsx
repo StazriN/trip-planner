@@ -74,7 +74,7 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
           id: docRef.id,
         });
       })
-      .then(() => history.push("map"));
+      .then(() => history.push("/"));
   };
 
   return (
