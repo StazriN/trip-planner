@@ -65,9 +65,6 @@ const mapStateToProps = ({ selectedTrip }: RootState) => {
   return { selectedTrip };
 };
 
-let  imageUrls: string[] = [];
-let picsReady = false;
-
 type TripDetailProps = ReturnType<typeof mapStateToProps>;
 
 const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
@@ -103,9 +100,8 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
       setNotes(trip.notes)
 
       storage.ref(`/images/${trip.id}/`).listAll().then(function (result) {
-        const numOfPics = result.items.length;
         result.items.forEach(function (imageRef) {
-          getImageRef(imageRef, numOfPics);
+          getImageRef(imageRef);
         });
       }).catch(
         error => {
@@ -115,18 +111,9 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
     }
   }, [trip]);
 
-  const getImageRef = (imageRef: firebase.storage.Reference, numOfPics: number) => {
+  const getImageRef = (imageRef: firebase.storage.Reference) => {
     imageRef.getDownloadURL().then(function (url: string) {
       setPictures([...pictures, url]);
-      imageUrls.push(url);
-      console.log(url);
-    }).then(() => {
-      console.log(imageUrls);
-      if (imageUrls.length === numOfPics) {
-        picsReady = true;
-        console.log("all pics loaded from urls");
-        console.log(pictures);
-      }
     }).catch(function (error: any) {
       throw new Error(error);
     });
@@ -248,15 +235,11 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
             <Grid container direction={'column'}>
               <Grid item>
                 <Typography variant={'h5'} align={'left'}>Pictures:</Typography>
-                {/* {imageUrls.map((url) => (
-                  <Typography variant={'h5'} align={'left'}>{url}</Typography>
-                ))} */}
-                {picsReady &&
-                  imageUrls.map((picture) => (
-                    <Grid item>
-                      <img className={classes.image} src={`${picture}`} height={200} width={200} />
-                    </Grid>
-                  ))
+                {pictures.map((picture) => (
+                  <Grid item>
+                    <img className={classes.image} src={`${picture}`} height={200} width={200} />
+                  </Grid>
+                ))
                 }
               </Grid>
             </Grid>
