@@ -31,6 +31,7 @@
     "react-redux-firebase": "^3.8.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "react-scrollbars-custom": "^4.0.25",
     "redux": "^4.0.5",
     "redux-firestore": "^0.14.0",
     "redux-thunk": "^2.3.0",

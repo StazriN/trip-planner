@@ -45,12 +45,16 @@ export function setSelectedTripId(id: string) {
 
 /*************************************************** WEATHER ************************************************************/
 
-export function downloadWeather(data: any, areaName: string) {
-  return action(ActionStrings.DOWNLOAD_WEATHER, { data, areaName });
+export function downloadWeather(data: any, areaName: string, areaId: number) {
+  return action(ActionStrings.DOWNLOAD_WEATHER, { data, areaName, areaId });
 }
 
 export function setWeatherLocation(areaName: string, id: number, LatLng: LatLngTuple) {
   return action(ActionStrings.SET_WEATHER_LOCATION, { areaName, id, LatLng });
+}
+
+export function reinitializeWeather(on: boolean) {
+  return action(ActionStrings.REINITIALIZE_WEATHER, { on });
 }
 
 /*************************************************** WEATHER ************************************************************/

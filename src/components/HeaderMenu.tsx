@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     textAlign: "center",
   },
-  link: { textDecoration: "none", color: theme.palette.secondary.dark },
+  link: { textDecoration: "none", color: theme.palette.secondary.dark, textTransform: "uppercase" },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -130,7 +130,6 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
           </IconButton>
         </div>
         <Divider />
-        {/* TODO napisat lepsie */}
         {props.navigation.panelContext === "menu" ? (
           <List>
             <Link className={classes.link} to="/">

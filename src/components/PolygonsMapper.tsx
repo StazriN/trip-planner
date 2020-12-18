@@ -20,8 +20,6 @@ const PolygonsMapper: FC<IPolygonsMapperProps> = (props) => {
   };
 
   const getFirstPosition = (geometry: Geometry) => {
-    console.log(geometry.rings[0][0]);
-
     return [geometry.rings[0][0][1], geometry.rings[0][0][0]] as LatLngTuple;
   };
 

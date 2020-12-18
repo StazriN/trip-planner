@@ -8,12 +8,17 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import { CardActions, TextareaAutosize } from "@material-ui/core";
+import { CardActions, makeStyles, TextareaAutosize } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import { useFirestore } from "react-redux-firebase";
-import { setRightPanelContext } from "../redux/actions";
+import { reinitializeWeather, setRightPanelContext, setWeatherLocation } from "../redux/actions";
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
+
+const useStyles = makeStyles((theme) => ({
+  notchedOutline: { borderColor: theme.palette.primary.dark },
+  input: { backgroundColor: "#ffffffad" },
+}));
 
 const mapStateToProps = ({ areas }: RootState) => {
   return { areas };
@@ -29,6 +34,8 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
   const history = useHistory();
   const firestore = useFirestore();
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
+
+  const classes = useStyles();
 
   const handleClose = () => {
     // TODO
@@ -47,6 +54,7 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
   };
 
   const openWeather = () => {
+    store.dispatch(reinitializeWeather(true));
     store.dispatch(setRightPanelContext("weather", true));
   };
 
@@ -87,7 +95,16 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
           <Typography color="secondary" variant="h5">
             {areas.clickedArea?.name}
           </Typography>
-          <TextField label="Name" name="name" fullWidth margin="normal" variant="outlined" value={name} onChange={onNameChange} />
+          <TextField
+            InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+            label="Name"
+            name="name"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={name}
+            onChange={onNameChange}
+          />
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
               fullWidth
@@ -101,9 +118,20 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas }) => {
               KeyboardButtonProps={{
                 "aria-label": "change date",
               }}
+              InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
             />
           </MuiPickersUtilsProvider>
-          <TextField variant="outlined" id="standard-multiline-flexible" label="Note" multiline fullWidth rowsMax={4} value={note} onChange={onNoteChange} />
+          <TextField
+            InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+            variant="outlined"
+            id="standard-multiline-flexible"
+            label="Note"
+            multiline
+            fullWidth
+            rowsMax={4}
+            value={note}
+            onChange={onNoteChange}
+          />
         </CardContent>
 
         <CardActions>
