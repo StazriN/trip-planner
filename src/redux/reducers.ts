@@ -80,6 +80,7 @@ export function selectedTripReducer(state: ISelectedTripState = selectedTripInit
 const weatherInit: IWeatherState = {
   displayedLocation: { name: "Blaník", id: NaN },
   displayedLocationCoordinates: [0, 0],
+  reinitialize: false,
   cityData: [],
 };
 
@@ -87,13 +88,17 @@ export function weatherReducer(state: IWeatherState = weatherInit, action: Actio
   switch (action.type) {
     case ActionStrings.DOWNLOAD_WEATHER:
       return Object.assign({}, state, {
-        cityData: [new WeatherInfo(action.payload.areaName, new Date().getTime(), action.payload.data), ...state.cityData],
+        cityData: [new WeatherInfo(action.payload.areaName, action.payload.areaId, new Date().getTime(), action.payload.data)],
+        reinitialize: false,
       });
     case ActionStrings.SET_WEATHER_LOCATION:
-      console.log(action.payload);
       return Object.assign({}, state, {
         displayedLocation: { name: action.payload.areaName, id: action.payload.id },
         displayedLocationCoordinates: [...action.payload.LatLng],
+      });
+    case ActionStrings.REINITIALIZE_WEATHER:
+      return Object.assign({}, state, {
+        reinitialize: action.payload.on,
       });
     default:
       return state;

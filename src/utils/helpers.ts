@@ -33,7 +33,6 @@ export const findMeCenter = (data: Geometry) => {
 
   // const result = { lat: (minY + maxY) / 2, lng: (minX + maxX) / 2,  };
   const result: LatLngTuple = [(minY + maxY) / 2, (minX + maxX) / 2];
-  console.log(result);
   return result;
 };
 
@@ -52,4 +51,14 @@ export const getEndpoint = (area: AreaType) => {
     case "smallAreas":
       return [AreasApis.SMALL_AREAS, ActionStrings.SMALL_AREAS_DOWNLOADED];
   }
+};
+
+export const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+export const formatDateToDate = (value: Date): string => {
+  var dd = value.getDate();
+  var mm = value.getMonth() + 1;
+  var yyyy = value.getFullYear().toString();
+
+  return (dd < 10 ? "0" + dd.toString() : dd.toString()) + "." + (mm < 10 ? "0" + mm.toString() : mm.toString()) + "." + yyyy;
 };

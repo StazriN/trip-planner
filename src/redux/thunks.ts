@@ -10,10 +10,10 @@ export const downloadArea = (api: string, action: string): AppThunk => async (di
     });
 };
 
-export const downloadWeather = (api: string, action: string, name: string): AppThunk => async (dispatch) => {
+export const downloadWeather = (api: string, action: string, name: string, id: number): AppThunk => async (dispatch) => {
   return fetch(api)
     .then((response) => response.json())
     .then((json) => {
-      dispatch({ type: action, payload: { data: json, areaName: name } });
+      dispatch({ type: action, payload: { data: json, areaName: name, areaId: id } });
     });
 };

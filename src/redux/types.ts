@@ -23,6 +23,7 @@ export interface ISelectedTripState {
 export interface IWeatherState {
   displayedLocation: { name: string; id: number };
   displayedLocationCoordinates: LatLngTuple;
+  reinitialize: boolean;
   cityData: WeatherInfo[];
 }
 
@@ -46,6 +47,7 @@ export enum ActionStrings {
   // WRATHER
   DOWNLOAD_WEATHER = "DOWNLOAD_WEATHER",
   SET_WEATHER_LOCATION = "SET_WEATHER_LOCATION",
+  REINITIALIZE_WEATHER = "REINITIALIZE_WEATHER",
   // NAVIGATION
   SET_RIGHT_PANEL_CONTEXT = "SET_RIGHT_PANEL_CONTEXT",
 }

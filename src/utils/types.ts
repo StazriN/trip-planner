@@ -61,11 +61,13 @@ export type AreaData = {
 
 export class WeatherInfo {
   areaName: string;
+  areaId: number;
   timestamp: number;
-  data: any = null;
+  data: WeatherData;
 
-  constructor(areaName: string, timestamp: number, data: any) {
+  constructor(areaName: string, id: number, timestamp: number, data: any) {
     this.areaName = areaName;
+    this.areaId = id;
     this.timestamp = timestamp;
     this.data = data;
   }
@@ -76,3 +78,11 @@ export type panelContextType = "menu" | "weather";
 export type AreaType = "birdAreas" | "largeProtectedAreas" | "smallAreas" | "euAreas" | "geoparks" | "bioAreas";
 
 export type MenuItemsType = Record<AreaType, string>;
+
+export type WeatherData = { daily: WeatherDay[]; timezone: string; timezone_offset: string };
+
+export type WeatherDay = { clouds: number; dt: number; humidity: number; pressure: number; sunrise: number; sunset: number; temp: Temperature; weather: Weather[] };
+
+export type Temperature = { day: number; eve: number; max: number; min: number; morn: number; night: number };
+
+export type Weather = { description: string; icon: string; id: number; main: string };
