@@ -98,25 +98,29 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
       setName(trip.name)
       setDate(trip.date.toDate())
       setNotes(trip.notes)
-
-      storage.ref(`/images/${trip.id}/`).listAll().then(function (result) {
-        result.items.forEach(function (imageRef) {
-          getImageRef(imageRef);
-        });
-      }).catch(
-        error => {
-          throw new Error(error);
-        });
-
+      downloadImages(trip.id)
     }
   }, [trip]);
 
-  const getImageRef = (imageRef: firebase.storage.Reference) => {
-    imageRef.getDownloadURL().then(function (url: string) {
-      setPictures([...pictures, url]);
-    }).catch(function (error: any) {
-      throw new Error(error);
-    });
+  const downloadImages = (tripId: string) => {
+    storage.ref(`/images/${tripId}/`).listAll().then(result => {
+      const numOfPics = result.items.length;
+      const urls: Array<string> = [];
+
+      result.items.forEach(imageRef => {
+        imageRef.getDownloadURL().then(url => {
+          urls.push(url);
+
+          // All urls downloaded
+          if (urls.length === numOfPics) {
+            setPictures(urls)
+          }
+        });
+      });
+    }).catch(
+      error => {
+        throw new Error(error);
+      });
   }
 
   const onNoteChange = (index: number, e: any) => {
@@ -143,8 +147,8 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         date,
         notes,
       }).then(() => {
-        setSnackbarOpen(true)
-      })
+      setSnackbarOpen(true)
+    })
   };
 
   const onDeleteClick = () => {
@@ -174,7 +178,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
           setURL(url);
         });
     });
-
   }
 
   const onDeleteConfirm = () => {
@@ -197,79 +200,82 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
 
   return (
     <>
-      {!trip && <CircularProgress className={classes.loader} />}
+      {!trip && <CircularProgress className={classes.loader}/>}
       {trip &&
-        <Paper className={classes.paper}>
-          <Typography variant={'h4'}>
-            {trip.name} - {trip.areaName}
-          </Typography>
-          <Grid container direction={'column'}>
-            <Grid item>
-              <Typography variant={'h5'} align={'left'}>Name:</Typography>
-              <TextField value={name} className={classes.nameInput} onChange={(e) => setName(e.target.value)} />
-            </Grid>
-            <Grid item>
-              <Typography variant={'h5'} align={'left'}>Trip Date:</Typography>
-              <Grid item className={classes.dateInputContainer}>
-                <DatePicker className={classes.dateInput} selected={date} onChange={(date: Date | null) => setDate(date ?? new Date())} />
-              </Grid>
-            </Grid>
-            {/*Notes*/}
-            <Grid item>
-              <Typography variant={'h5'} align={'left'}>Notes:</Typography>
-              {notes.map((note, index) => (
-                <Grid item>
-                  <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)} />
-                </Grid>
-              ))}
-            </Grid>
-            {/*Add Note*/}
-            <Grid item>
-              <Fab onClick={onAddNoteClick} className={classes.fab}>
-                <AddIcon />
-              </Fab>
+      <Paper className={classes.paper}>
+        <Typography variant={'h4'}>
+          {trip.name} - {trip.areaName}
+        </Typography>
+        <Grid container direction={'column'}>
+          <Grid item>
+            <Typography variant={'h5'} align={'left'}>Name:</Typography>
+            <TextField value={name} className={classes.nameInput} onChange={(e) => setName(e.target.value)}/>
+          </Grid>
+          <Grid item>
+            <Typography variant={'h5'} align={'left'}>Trip Date:</Typography>
+            <Grid item className={classes.dateInputContainer}>
+              <DatePicker className={classes.dateInput} selected={date} onChange={(date: Date | null) => setDate(date ?? new Date())}/>
             </Grid>
           </Grid>
-          {/* Pictures Preview*/}
-          {pictures && (pictures.length != 0) &&
-            <Grid container direction={'column'}>
+          {/*Notes*/}
+          <Grid item>
+            <Typography variant={'h5'} align={'left'}>Notes:</Typography>
+            {notes.map((note, index) => (
               <Grid item>
-                <Typography variant={'h5'} align={'left'}>Pictures:</Typography>
-                {pictures.map((picture) => (
-                  <Grid item>
-                    <img className={classes.image} src={`${picture}`} height={200} width={200} />
-                  </Grid>
-                ))
-                }
+                <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)}/>
               </Grid>
-            </Grid>
-          }
-          {/* Add Pictures */}
-          <Grid container direction="row">
-            <Grid item>
-              <Typography variant={'h5'} align={'left'}>Upload Picture:</Typography>
+            ))}
+          </Grid>
+          {/*Add Note*/}
+          <Grid item>
+            <Fab onClick={onAddNoteClick} className={classes.fab}>
+              <AddIcon/>
+            </Fab>
+          </Grid>
+        </Grid>
+        {/* Pictures Preview*/}
+        {pictures.length > 0 &&
+        <Grid container direction={'column'}>
+          <Grid item>
+            <Typography variant={'h5'} align={'left'}>Pictures:</Typography>
+            {/* {imageUrls.map((url) => (
+                  <Typography variant={'h5'} align={'left'}>{url}</Typography>
+                ))} */}
+            {pictures.map((picture) => (
               <Grid item>
-                <form>
-                  <input type="file" onChange={handleImageChange} />
-                </form>
-                <img src={url} alt="" />
+                <img className={classes.image} src={`${picture}`} height={200} width={200}/>
               </Grid>
+            ))
+            }
+          </Grid>
+        </Grid>
+        }
+        {/* Add Pictures */}
+        <Grid container direction="row">
+          <Grid item>
+            <Typography variant={'h5'} align={'left'}>Upload Picture:</Typography>
+            <Grid item>
+              <form>
+                <input type="file" onChange={handleImageChange}/>
+              </form>
+              <img src={url} alt=""/>
             </Grid>
           </Grid>
-          {/*Delete and Save*/}
-          <Grid container alignItems={'flex-start'} spacing={1}>
-            <Grid item>
-              <Fab onClick={onSaveClick}>
-                <SaveIcon />
-              </Fab>
-            </Grid>
-            <Grid item>
-              <Fab onClick={onDeleteClick} className={classes.delete}>
-                <RemoveIcon />
-              </Fab>
-            </Grid>
+        </Grid>
+        {/*Delete and Save*/}
+        <Grid container alignItems={'flex-start'} spacing={1}>
+          <Grid item>
+            <Fab onClick={onSaveClick}>
+              <SaveIcon/>
+            </Fab>
           </Grid>
-        </Paper>}
+          <Grid item>
+            <Fab onClick={onDeleteClick} className={classes.delete}>
+              <RemoveIcon/>
+            </Fab>
+          </Grid>
+        </Grid>
+      </Paper>}
       {/*Saved info snackbar*/}
       <Snackbar
         anchorOrigin={{
@@ -283,13 +289,13 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         action={
           <>
             <IconButton size="small" aria-label="close" color="inherit" onClick={onSnackbarClose}>
-              <CloseIcon fontSize="small" />
+              <CloseIcon fontSize="small"/>
             </IconButton>
           </>
         }
       />
       {/*Confirm delete dialog*/}
-      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} />
+      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen}/>
     </>
   );
 }
