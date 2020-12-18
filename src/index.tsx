@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
+import 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: "AIzaSyCD_r5I3BcheqHEeuCeZvzHrqD68R2vvSw",
@@ -18,6 +19,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.firestore();
 
+const storage = firebase.storage();
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
@@ -29,3 +32,7 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+export  {
+  storage, firebase as default
+}
