@@ -18,6 +18,7 @@ import DatePicker from "react-datepicker";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
 import { storage } from '../index'
+import firebase from 'firebase';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -53,14 +54,19 @@ const useStyles = makeStyles(theme => ({
   delete: {
     backgroundColor: '#ff1744'
   },
-  addPicture: {
-
+  image: {
+    width: '200px',
+    height: 'auto',
+    display: 'block',
   }
 }))
 
 const mapStateToProps = ({ selectedTrip }: RootState) => {
   return { selectedTrip };
 };
+
+let  imageUrls: string[] = [];
+let picsReady = false;
 
 type TripDetailProps = ReturnType<typeof mapStateToProps>;
 
@@ -75,9 +81,7 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
-  const [images, setImages] = useState<Array<String>>([])
-  const [imageToPush, setImageToPush] = useState<File>()
-
+  const [pictures, setPictures] = useState<Array<string>>([]);
   const [file, setFile] = useState<File>();
   const [url, setURL] = useState("");
 
@@ -97,9 +101,36 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
       setName(trip.name)
       setDate(trip.date.toDate())
       setNotes(trip.notes)
-      setImages(trip.images)
+
+      storage.ref(`/images/${trip.id}/`).listAll().then(function (result) {
+        const numOfPics = result.items.length;
+        result.items.forEach(function (imageRef) {
+          getImageRef(imageRef, numOfPics);
+        });
+      }).catch(
+        error => {
+          throw new Error(error);
+        });
+
     }
-  }, [trip])
+  }, [trip]);
+
+  const getImageRef = (imageRef: firebase.storage.Reference, numOfPics: number) => {
+    imageRef.getDownloadURL().then(function (url: string) {
+      setPictures([...pictures, url]);
+      imageUrls.push(url);
+      console.log(url);
+    }).then(() => {
+      console.log(imageUrls);
+      if (imageUrls.length === numOfPics) {
+        picsReady = true;
+        console.log("all pics loaded from urls");
+        console.log(pictures);
+      }
+    }).catch(function (error: any) {
+      throw new Error(error);
+    });
+  }
 
   const onNoteChange = (index: number, e: any) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
@@ -116,21 +147,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
 
     handleUpload();
 
-    // firestore
-    //   .collection('images')
-    //   .put({
-    //     imageToPush
-    //   })
-    //   .then((docRef: any) => {
-    //     console.log(docRef);
-    //     docRef.update({
-    //       id: docRef.id,
-    //     });
-    //     setImages(images.concat(docRef.id));
-    //   });
-
-    console.log(images);
-
     firestore
       .collection('users')
       .doc(uid)
@@ -139,7 +155,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
       .update({
         date,
         notes,
-        // images
       }).then(() => {
         setSnackbarOpen(true)
       })
@@ -157,13 +172,11 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
     setFile(e.target.files[0]);
   }
 
-  console.log(file);
   function handleUpload() {
-    // e.preventDefault();
     if (!file) {
       return
     }
-    const uploadTask = storage.ref(`/images/${file.name}`).put(file);
+    const uploadTask = storage.ref(`/images/${trip?.id}/${file.name}`).put(file);
     uploadTask.on("state_changed", console.log, console.error, () => {
       storage
         .ref("images")
@@ -175,13 +188,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         });
     });
 
-  }
-
-  // console.log(imageToPush);
-  const handleAddPicture = (e: any) => {
-    console.log(e);
-    const image = e.target.files[0]
-    setImageToPush((imageFile: any) => (image))
   }
 
   const onDeleteConfirm = () => {
@@ -238,35 +244,32 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
             </Grid>
           </Grid>
           {/* Pictures Preview*/}
-          {images &&
+          {pictures && (pictures.length != 0) &&
             <Grid container direction={'column'}>
               <Grid item>
-                <Typography variant={'h5'} align={'left'}>Images:</Typography>
-                {images.map((image) => (
-                  <Grid item>
-                    <img src="image" height={200} width={200} />
-                  </Grid>
-                ))}
+                <Typography variant={'h5'} align={'left'}>Pictures:</Typography>
+                {/* {imageUrls.map((url) => (
+                  <Typography variant={'h5'} align={'left'}>{url}</Typography>
+                ))} */}
+                {picsReady &&
+                  imageUrls.map((picture) => (
+                    <Grid item>
+                      <img className={classes.image} src={`${picture}`} height={200} width={200} />
+                    </Grid>
+                  ))
+                }
               </Grid>
             </Grid>
           }
           {/* Add Pictures */}
           <Grid container direction="row">
             <Grid item>
-              <Typography variant={'h5'} align={'left'}>Images to upload:</Typography>
+              <Typography variant={'h5'} align={'left'}>Upload Picture:</Typography>
               <Grid item>
-                {/* <form>
-                  <input
-                    type="file"
-                    onChange={handleAddPicture}
-                  />
-                </form> */}
-
                 <form>
                   <input type="file" onChange={handleImageChange} />
                 </form>
                 <img src={url} alt="" />
-
               </Grid>
             </Grid>
           </Grid>
@@ -282,11 +285,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
                 <RemoveIcon />
               </Fab>
             </Grid>
-            {/* <Grid item>
-              <Fab onClick={onAddMorePictures} className={classes.addPicture}>
-                <AddToPhotosIcon />
-              </Fab>
-            </Grid> */}
           </Grid>
         </Paper>}
       {/*Saved info snackbar*/}

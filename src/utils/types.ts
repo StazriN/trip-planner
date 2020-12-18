@@ -9,7 +9,6 @@ export type Trip = {
   notes: string[];
   areaId: number;
   areaName: string;
-  images: string[];
   position: { lng: number; lat: number };
 };
 
