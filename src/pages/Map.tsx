@@ -4,11 +4,11 @@ import { CircularProgress, Container, makeStyles } from "@material-ui/core";
 import { LatLngTuple } from "leaflet";
 import { RootState, store } from "../redux";
 import { downloadArea } from "../redux/thunks";
-import { AreaType, ClickedArea } from "../utils/types";
+import { AreaType } from "../utils/types";
 import PolygonsMapper from "../components/PolygonsMapper";
 import { connect } from "react-redux";
 import { setClickedArea, setDownloading } from "../redux/actions";
-import { checkValidArea, getEndpoint, isMobileMode } from "../utils/helpers";
+import { getEndpoint, isMobileMode } from "../utils/helpers";
 import PlanTrip from "../components/PlanTrip";
 import { useWindowSize } from "../hooks/useWindowSize";
 
@@ -79,8 +79,6 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
   const classes = useStyles(size);
 
   useEffect(() => {
-    if (!checkValidArea(areaType)) return;
-
     if (!areas[areaType]) {
       store.dispatch(setDownloading());
       const [api, actionString] = getEndpoint(areaType);

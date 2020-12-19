@@ -12,14 +12,11 @@ import bioArea from "../assets/jpg/areacards/bileKarpaty.jpg";
 const useStyles = makeStyles((theme) => ({
   backDiv: {
     background: `url(${bImg}) center cover`,
-    // width: "100vw",
-    // height: "100vh",
     top: 0,
     position: "absolute",
     zIndex: -1,
   },
   title: {
-    // left: "100px",
     fontFamily: "Lucida Handwriting, Cursive",
     fontSize: "50px",
     color: theme.palette.secondary.main,
@@ -36,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   cardActions: {
-    display: "flex",
+    height: "100%",
     flexFlow: "column",
     alignItems: "flex-start",
   },

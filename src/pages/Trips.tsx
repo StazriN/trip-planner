@@ -1,45 +1,36 @@
-import React, { FC,  useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from "react";
 import { Trip } from "../utils/types";
-import InfoIcon from '@material-ui/icons/Info';
-
-import {
-  GridList,
-  GridListTile,
-  GridListTileBar, IconButton,
-  ListSubheader,
-  makeStyles
-} from "@material-ui/core";
-import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
+import { Container, GridList, GridListTile, GridListTileBar, makeStyles } from "@material-ui/core";
+import TripPlaceholder from "../assets/jpg/TripPlaceholder.jpg";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { useFirestoreConnect } from "react-redux-firebase";
 import { useHistory } from "react-router-dom";
 import { storage } from "../index";
+import { useWindowSize } from "../hooks/useWindowSize";
+import { getGridColumns } from "../utils/helpers";
+import { fade } from "@material-ui/core/styles/colorManipulator";
+import RSC from "react-scrollbars-custom";
 
-const useStyles = makeStyles(({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
+const useStyles = makeStyles((theme) => ({
+  backgroundDiv: {
+    backgroundColor: fade(theme.palette.secondary.main, 0.3),
+    width: "100%",
+    height: "85vh !important",
+    paddingTop: 20,
   },
-  gridList: {
-    width: 500,
-    height: 450,
-  },
-  icon: {
-    color: 'rgba(255, 255, 255, 0.54)',
+  gridItem: {
+    cursor: "pointer",
+    borderRadius: "5px",
   },
 }));
 
 const Trips: FC = () => {
-  const classes = useStyles();
-
-  const [tripsImages, setTripsImages] = useState<Array<{ id: string, image: string }>>([])
-
+  const [tripsImages, setTripsImages] = useState<Array<{ id: string; image: string }>>([]);
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
 
   const history = useHistory();
+  const classes = useStyles();
 
   useFirestoreConnect({
     collection: `users/${uid}/trips`,
@@ -49,16 +40,16 @@ const Trips: FC = () => {
   const trips: Array<Trip> = useSelector((state: RootState) => state.firestore.data.trips);
 
   const onTripDetailClick = (id: string) => {
-    history.push(`/trip-detail/${id}`)
-  }
+    history.push(`/trip-detail/${id}`);
+  };
 
   const downloadImage = async (tripId: string) => {
-    const list = await storage.ref(`users/${uid}/images/${tripId}/`).listAll()
+    const list = await storage.ref(`users/${uid}/images/${tripId}/`).listAll();
     if (list.items.length > 0) {
-      const url = await list.items[0].getDownloadURL()
-      return { id: tripId, image: url }
+      const url = await list.items[0].getDownloadURL();
+      return { id: tripId, image: url };
     }
-  }
+  };
 
   useEffect(() => {
     const downloadImagesAsync = async (allTrips: Trip[]) => {
@@ -66,45 +57,42 @@ const Trips: FC = () => {
 
       await Object.values(allTrips).reduce(async (promise, trip) => {
         await promise;
-        const image = await downloadImage(trip.id)
+        const image = await downloadImage(trip.id);
         if (image) {
           images.push(image);
         }
-      }, Promise.resolve())
+      }, Promise.resolve());
 
       return images;
-    }
+    };
 
     if (trips) {
       downloadImagesAsync(trips)
-        .then(array => setTripsImages(array))
-        .catch(err => console.log(err))
+        .then((array) => setTripsImages(array))
+        .catch((err) => console.log(err));
     }
-  }, [trips])
+  }, [trips]);
+
+  const windowSize = useWindowSize();
+  const columns = getGridColumns(windowSize);
 
   return (
-    <div className={classes.root}>
-      {<GridList cellHeight={350} className={classes.gridList}>
-        <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
-          <ListSubheader component="div" style={{ color: 'white' }}>My trips</ListSubheader>
-        </GridListTile>
-        {trips && Object.values(trips).map((trip) => (
-          <GridListTile key={trip.id}>
-            <img src={tripsImages.find(item => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
-            <GridListTileBar
-              title={trip.name}
-              subtitle={<span>{trip.date?.toDate().toDateString()}</span>}
-              actionIcon={
-                <IconButton aria-label={`Open ${trip.name} details`} className={classes.icon} onClick={() => onTripDetailClick(trip.id)}>
-                  <InfoIcon />
-                </IconButton>
-              }
-            />
-          </GridListTile>
-        ))}
-      </GridList>}
+    <div className={classes.backgroundDiv}>
+      <RSC>
+        <Container>
+          <GridList cellHeight={350} spacing={10} cols={columns}>
+            {trips &&
+              Object.values(trips).map((trip) => (
+                <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
+                  <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
+                  <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>} />
+                </GridListTile>
+              ))}
+          </GridList>
+        </Container>
+      </RSC>
     </div>
   );
-}
+};
 
 export default Trips;

@@ -54,11 +54,6 @@ export const getEndpoint = (area: AreaType) => {
   }
 };
 
-export const checkValidArea = (area: string) => {
-  const areas = ["birdAreas", "largeProtectedAreas", "smallAreas", "euAreas", "geoparks", "bioAreas"];
-  return areas.includes(area);
-};
-
 export const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export const formatDateToDate = (value: Date): string => {
@@ -70,9 +65,17 @@ export const formatDateToDate = (value: Date): string => {
 };
 
 export const isValidAreaType = (str: AreaType): boolean => {
-  return AreaTypeArray.includes(str)
-}
+  return AreaTypeArray.includes(str);
+};
 
 export const isMobileMode = (windowSize: IWindowSize) => {
   return windowSize.width !== undefined && windowSize.width < 800;
+};
+
+export const getGridColumns = (windowSize: IWindowSize) => {
+  if (windowSize.width === undefined) return 0;
+  if (windowSize.width > 1200) return 4;
+  if (windowSize.width > 800) return 3;
+  if (windowSize.width > 460) return 2;
+  return 1;
 };

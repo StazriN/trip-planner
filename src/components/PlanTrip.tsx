@@ -28,9 +28,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#ffffffad",
   },
   button: {
+    marginTop: "4px",
+    marginBottom: "4px",
     marginLeft: "2px",
     marginRight: "2px",
-    width: (windowSize: IWindowSize) => (windowSize?.width !== undefined && windowSize?.width > 800 ? "calc(55% - 4px)" : "calc(100% - 12px)"),
+    width: (windowSize: IWindowSize) => (windowSize?.width !== undefined && windowSize?.width > 800 ? "calc(50% - 4px)" : "calc(100% - 12px)"),
   },
   paper: {
     backgroundColor: "#ffffffad",
@@ -42,6 +44,10 @@ const useStyles = makeStyles((theme) => ({
 
   emptyText: {
     marginTop: "40%",
+  },
+  actionArea: {
+    display: "flex",
+    flexWrap: "wrap",
   },
 }));
 
@@ -165,7 +171,7 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
                 onChange={onNoteChange}
               />
             </CardContent>
-            <CardActions disableSpacing>
+            <CardActions disableSpacing className={classes.actionArea}>
               {mobileOn && (
                 <Button className={classes.button} color="secondary" variant="outlined" startIcon={<CloseIcon />} onClick={onClose}>
                   Close

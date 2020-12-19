@@ -1,5 +1,5 @@
-import React, {FC, useState} from "react";
-import {useHistory} from "react-router-dom";
+import React, { FC, useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -8,9 +8,8 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
-import Logo from "../assets/png/Logo.png";
-import {useFirebase} from "react-redux-firebase";
-import {makeStyles} from "@material-ui/core";
+import { useFirebase } from "react-redux-firebase";
+import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   filledInput: {
@@ -42,7 +41,7 @@ const Login: FC = () => {
     firebase
       .login({
         email: email,
-        password: password
+        password: password,
       })
       .then(() => {
         history.push("/");
@@ -52,7 +51,6 @@ const Login: FC = () => {
   return (
     <Card>
       <CardContent>
-        <img src={Logo} alt={'Trip Planner logo'} width={100}/>
         <Typography variant="h5" component="h1">
           Sign in
         </Typography>
@@ -68,7 +66,7 @@ const Login: FC = () => {
           value={user}
           onChange={(e) => setUser(e.target.value)}
         />
-        <TextField label="Password" type="password" name="password" fullWidth margin="normal" variant="outlined" value={password} onChange={(e) => setPassword(e.target.value)}/>
+        <TextField label="Password" type="password" name="password" fullWidth margin="normal" variant="outlined" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && (
           <Typography variant="subtitle2" align="left" color="error" paragraph>
             <b>{error}</b>

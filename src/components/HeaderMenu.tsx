@@ -24,16 +24,12 @@ const useStyles = makeStyles((theme) => ({
   },
   login: {
     background: "transparent",
-    "&:hover": {
-      //background: "transparent",
-      //color: "white",
-    },
   },
   title: {
     flexGrow: 1,
     textAlign: "center",
   },
-  link: { textDecoration: "none", color: theme.palette.secondary.dark },
+  link: { textDecoration: "none", color: theme.palette.secondary.dark, overflow: "hidden" },
   listIcon: { color: theme.palette.secondary.dark, opacity: "0.80" },
   drawerHeader: {
     display: "flex",
@@ -136,7 +132,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
         <Divider />
         {props.navigation.panelContext === "menu" ? (
           <List>
-            <Link className={classes.link} to="/">
+            <Link onClick={handleDrawerToggle} className={classes.link} to="/">
               <ListItem button key={1}>
                 <ListItemIcon>
                   <HomeIcon className={classes.listIcon} />
@@ -146,7 +142,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
             </Link>
             {uid && (
               <>
-                <Link className={classes.link} to="/trips">
+                <Link onClick={handleDrawerToggle} className={classes.link} to="/trips">
                   <ListItem button key={2}>
                     <ListItemIcon>
                       <LocationOnIcon className={classes.listIcon} />
@@ -158,7 +154,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
               </>
             )}
             {Object.keys(menuList).map((key, index) => (
-              <Link key={index} className={classes.link} to={`/map/${key}`}>
+              <Link onClick={handleDrawerToggle} key={index} className={classes.link} to={`/map/${key}`}>
                 <ListItem button key={index + 3}>
                   <ListItemIcon>
                     <ExploreIcon className={classes.listIcon} />
