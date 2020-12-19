@@ -55,6 +55,10 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
     setPlanTripDisplayed(false);
   }, [areaType]);
 
+  const isSelectedAreaDownloading = () => {
+    return !areas[areaType] && areas.isDownloading
+  }
+
   return (
     <Container className={classes.mainContainer} maxWidth={false}>
       <Container className={classes.dialogContainer} maxWidth={false}>
@@ -62,8 +66,8 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
       </Container>
 
       <Container className={classes.mapContainer} maxWidth={false}>
-        {areas.isDownloading && <CircularProgress className={classes.loader} />}
-        <MapContainer id="mapId" center={mapCenter} zoom={zoom} className={[classes.map, areas.isDownloading ? classes.lowOpacity : ""].join(" ")}>
+        {isSelectedAreaDownloading() && <CircularProgress className={classes.loader} />}
+        <MapContainer id="mapId" center={mapCenter} zoom={zoom} className={[classes.map, isSelectedAreaDownloading() ? classes.lowOpacity : ""].join(" ")}>
           <TileLayer
             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
