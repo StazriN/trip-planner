@@ -1,5 +1,5 @@
-import React, {FC, useEffect, useState} from 'react';
-import {Trip} from "../utils/types";
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { Trip } from "../utils/types";
 import InfoIcon from '@material-ui/icons/Info';
 
 import {
@@ -10,11 +10,11 @@ import {
   makeStyles
 } from "@material-ui/core";
 import TripPlaceholder from '../assets/jpg/TripPlaceholder.jpg';
-import Typography from "@material-ui/core/Typography";
-import {useSelector} from "react-redux";
-import {RootState, store} from "../redux";
-import {useFirestore, useFirestoreConnect} from "react-redux-firebase";
-import {useHistory} from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux";
+import { useFirestoreConnect } from "react-redux-firebase";
+import { useHistory } from "react-router-dom";
+import { storage } from "../index";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 const Trips: FC = () => {
   const classes = useStyles();
 
-  const [error, setError] = useState<string>();
+  const [tripsImages, setTripsImages] = useState<Array<{ id: string, image: string }>>([])
 
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
 
@@ -52,32 +52,57 @@ const Trips: FC = () => {
     history.push(`/trip-detail/${id}`)
   }
 
+  const downloadImage = async (tripId: string) => {
+    const list = await storage.ref(`/images/${tripId}/`).listAll()
+    if (list.items.length > 0) {
+      const url = await list.items[0].getDownloadURL()
+      return { id: tripId, image: url }
+    }
+  }
+
+  const downloadImagesAsync = useCallback(async (trips: Trip[]) => {
+    const images: typeof tripsImages = [];
+
+    await Object.values(trips).reduce(async (promise, trip) => {
+      await promise;
+      const image = await downloadImage(trip.id)
+      if (image) {
+        images.push(image);
+      }
+    }, Promise.resolve())
+
+    return images;
+  }, []);
+
+  useEffect(() => {
+    if (trips) {
+      downloadImagesAsync(trips)
+        .then(array => setTripsImages(array))
+        .catch(err => console.log(err))
+    }
+  }, [trips, downloadImagesAsync])
+
   return (
     <div className={classes.root}>
-      {!error && <GridList cellHeight={350} className={classes.gridList}>
-          <GridListTile key="Subheader" cols={2} style={{height: 'auto'}}>
-              <ListSubheader component="div" style={{color: 'white'}}>My trips</ListSubheader>
-          </GridListTile>
+      {<GridList cellHeight={350} className={classes.gridList}>
+        <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
+          <ListSubheader component="div" style={{ color: 'white' }}>My trips</ListSubheader>
+        </GridListTile>
         {trips && Object.values(trips).map((trip) => (
           <GridListTile key={trip.id}>
-            <img src={TripPlaceholder} alt={trip.name}/>
+            <img src={tripsImages.find(item => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
             <GridListTileBar
               title={trip.name}
               subtitle={<span>{trip.date?.toDate().toDateString()}</span>}
               actionIcon={
                 <IconButton aria-label={`Open ${trip.name} details`} className={classes.icon} onClick={() => onTripDetailClick(trip.id)}>
-                  <InfoIcon/>
+                  <InfoIcon />
                 </IconButton>
               }
             />
           </GridListTile>
         ))}
       </GridList>}
-      {error && (
-        <Typography variant='subtitle2' align='center' color='error' paragraph>
-          <b>{error}</b>
-        </Typography>
-      )}
     </div>
   );
 }

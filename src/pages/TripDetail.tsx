@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Trip } from "../utils/types";
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Delete';
@@ -18,6 +18,7 @@ import DatePicker from "react-datepicker";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import { storage } from '../index'
 import Notfound from "./NotFound";
+import firebase from "firebase/app";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -97,35 +98,29 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     }
   }, [tripId, trips])
 
+  const downloadImagesAsync = useCallback(async (tripId: string) => {
+    const list = await storage.ref(`/images/${tripId}/`).listAll();
+    const pictures: Array<string> = [];
+
+    await list.items.reduce(async (promise, imageRef) => {
+      await promise;
+      const url = await imageRef.getDownloadURL()
+      pictures.push(url);
+    }, Promise.resolve());
+
+    return pictures;
+  }, []);
+
   useEffect(() => {
     if (trip) {
       setName(trip.name)
       setDate(trip.date.toDate())
       setNotes(trip.notes)
-      downloadImages(trip.id)
+      downloadImagesAsync(trip.id)
+        .then(pictures => setPictures(pictures))
+        .catch(err => console.log(err))
     }
   }, [trip]);
-
-  const downloadImages = (tripId: string) => {
-    storage.ref(`/images/${tripId}/`).listAll().then(result => {
-      const numOfPics = result.items.length;
-      const urls: Array<string> = [];
-
-      result.items.forEach(imageRef => {
-        imageRef.getDownloadURL().then(url => {
-          urls.push(url);
-
-          // All urls downloaded
-          if (urls.length === numOfPics) {
-            setPictures(urls)
-          }
-        });
-      });
-    }).catch(
-      error => {
-        throw new Error(error);
-      });
-  }
 
   const onNoteChange = (index: number, e: any) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
