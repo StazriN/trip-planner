@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC,  useEffect, useState } from 'react';
 import { Trip } from "../utils/types";
 import InfoIcon from '@material-ui/icons/Info';
 
@@ -16,7 +16,7 @@ import { useFirestoreConnect } from "react-redux-firebase";
 import { useHistory } from "react-router-dom";
 import { storage } from "../index";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   icon: {
     color: 'rgba(255, 255, 255, 0.54)',
   },
-}))
+}));
 
 const Trips: FC = () => {
   const classes = useStyles();
@@ -60,27 +60,27 @@ const Trips: FC = () => {
     }
   }
 
-  const downloadImagesAsync = useCallback(async (trips: Trip[]) => {
-    const images: typeof tripsImages = [];
-
-    await Object.values(trips).reduce(async (promise, trip) => {
-      await promise;
-      const image = await downloadImage(trip.id)
-      if (image) {
-        images.push(image);
-      }
-    }, Promise.resolve())
-
-    return images;
-  }, []);
-
   useEffect(() => {
+    const downloadImagesAsync = async (allTrips: Trip[]) => {
+      const images: typeof tripsImages = [];
+
+      await Object.values(allTrips).reduce(async (promise, trip) => {
+        await promise;
+        const image = await downloadImage(trip.id)
+        if (image) {
+          images.push(image);
+        }
+      }, Promise.resolve())
+
+      return images;
+    }
+
     if (trips) {
       downloadImagesAsync(trips)
         .then(array => setTripsImages(array))
         .catch(err => console.log(err))
     }
-  }, [trips, downloadImagesAsync])
+  }, [trips])
 
   return (
     <div className={classes.root}>

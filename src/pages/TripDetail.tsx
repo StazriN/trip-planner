@@ -98,7 +98,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     }
   }, [tripId, trips])
 
-  const downloadImagesAsync = useCallback(async (tripId: string) => {
+  const downloadImagesAsync = async (tripId: string) => {
     const list = await storage.ref(`/images/${tripId}/`).listAll();
     const pictures: Array<string> = [];
 
@@ -109,7 +109,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     }, Promise.resolve());
 
     return pictures;
-  }, []);
+  };
 
   useEffect(() => {
     if (trip) {
