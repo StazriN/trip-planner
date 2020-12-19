@@ -49,14 +49,17 @@ export type Geometry = {
 
 export type AreaFeature = {
   attributes: {
-    OBJECTID: number;
-    NAZEV: string;
+    OBJECTID: number,
+    NAZEV: string,
+    NAZEV_GP: string,
+    NAZEV_BR: string,
   };
   geometry: Geometry;
 };
 
 export type AreaData = {
   features: [AreaFeature];
+  displayFieldName: "NAZEV" | "NAZEV_BR" | "NAZEV_GP";
 };
 
 export class WeatherInfo {
