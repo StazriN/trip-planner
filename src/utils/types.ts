@@ -75,7 +75,8 @@ export class WeatherInfo {
 
 export type panelContextType = "menu" | "weather";
 
-export type AreaType = "birdAreas" | "largeProtectedAreas" | "smallAreas" | "euAreas" | "geoparks" | "bioAreas";
+export const AreaTypeArray = ["birdAreas", "largeProtectedAreas", "smallAreas", "euAreas", "geoparks", "bioAreas"] as const;
+export type AreaType = typeof AreaTypeArray[number];
 
 export type MenuItemsType = Record<AreaType, string>;
 

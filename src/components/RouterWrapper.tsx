@@ -12,6 +12,8 @@ import Notfound from "../pages/NotFound";
 import Map from "../pages/Map";
 import PlanTrip from "../pages/PlanTrip";
 import TripDetail from "../pages/TripDetail";
+import { AreaType } from "../utils/types";
+import { isValidAreaType } from "../utils/helpers";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -32,6 +34,10 @@ const RouterWrapper: FC = () => {
 
   const classes = useStyles();
 
+  const renderMapByAreaType = (areaType: AreaType) => {
+    return isValidAreaType(areaType) ? <Map areaType={areaType} /> : <Notfound />
+  }
+
   return (
     <Router>
       <HeaderMenu />
@@ -43,7 +49,7 @@ const RouterWrapper: FC = () => {
         ) : (
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/map/:areaType" exact render={({match}) => <Map areaType={match.params.areaType}/>}/>
+            <Route path="/map/:areaType" exact render={({ match }) => renderMapByAreaType(match.params.areaType)} />
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
             <Route path="/plan-trip" exact component={PlanTrip} />
