@@ -1,4 +1,4 @@
-import { AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import PersonIcon from "@material-ui/icons/Person";
 import React, { useEffect, useState } from "react";
@@ -13,6 +13,9 @@ import { store } from "../redux";
 import { setRightPanelContext } from "../redux/actions";
 import { AreaType, MenuItemsType, panelContextType } from "../utils/types";
 import WeatherWidget from "./WeatherWidget";
+import HomeIcon from "@material-ui/icons/Home";
+import ExploreIcon from "@material-ui/icons/Explore";
+import LocationOnIcon from "@material-ui/icons/LocationOn";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -30,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     textAlign: "center",
   },
-  link: { textDecoration: "none", color: theme.palette.secondary.dark, textTransform: "uppercase" },
+  link: { textDecoration: "none", color: theme.palette.secondary.dark },
+  listIcon: { color: theme.palette.secondary.main, opacity: "0.80" },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -126,7 +130,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerToggle}>
-            <ChevronRightIcon />
+            <ChevronRightIcon className={classes.listIcon} />
           </IconButton>
         </div>
         <Divider />
@@ -134,6 +138,9 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
           <List>
             <Link className={classes.link} to="/">
               <ListItem button key={1}>
+                <ListItemIcon>
+                  <HomeIcon className={classes.listIcon} />
+                </ListItemIcon>
                 <ListItemText primary={"Home"} />
               </ListItem>
             </Link>
@@ -141,7 +148,10 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
               <>
                 <Link className={classes.link} to="/trips">
                   <ListItem button key={2}>
-                    <ListItemText primary={"Trips"} />
+                    <ListItemIcon>
+                      <LocationOnIcon className={classes.listIcon} />
+                    </ListItemIcon>
+                    <ListItemText primary={"My trips"} />
                   </ListItem>
                 </Link>
                 <Divider />
@@ -150,6 +160,9 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
             {Object.keys(menuList).map((key, index) => (
               <Link className={classes.link} to={`/map/${key}`}>
                 <ListItem button key={index + 3}>
+                  <ListItemIcon>
+                    <ExploreIcon className={classes.listIcon} />
+                  </ListItemIcon>
                   <ListItemText primary={menuList[key as AreaType]} />
                 </ListItem>
               </Link>
