@@ -1,9 +1,10 @@
 import React, { FC } from "react";
 import { Provider } from "react-redux";
-import { rrfProps, store } from "./redux";
+import { persistor, rrfProps, store } from "./redux";
 import { ReactReduxFirebaseProvider } from "react-redux-firebase";
 import RouterWrapper from "./components/RouterWrapper";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core";
+import { PersistGate } from "redux-persist/integration/react";
 
 const ourTheme = createMuiTheme({
   palette: {
@@ -30,9 +31,11 @@ const App: FC = () => {
   return (
     <ThemeProvider theme={ourTheme}>
       <Provider store={store}>
-        <ReactReduxFirebaseProvider {...rrfProps}>
-          <RouterWrapper />
-        </ReactReduxFirebaseProvider>
+        <PersistGate loading={null} persistor={persistor}>
+          <ReactReduxFirebaseProvider {...rrfProps}>
+            <RouterWrapper />
+          </ReactReduxFirebaseProvider>
+        </PersistGate>
       </Provider>
     </ThemeProvider>
   );

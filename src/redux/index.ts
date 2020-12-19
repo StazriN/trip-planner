@@ -4,8 +4,10 @@ import { firebaseReducer } from "react-redux-firebase";
 import { createFirestoreInstance, firestoreReducer } from "redux-firestore";
 import { areasReducer, navigationReducer, selectedTripReducer, weatherReducer } from "./reducers";
 import thunk from "redux-thunk";
+import localforage from "localforage"; // Improves the offline experience (default storage can't handle large JSONs with geo data...)
+import { persistStore, persistReducer } from "redux-persist";
 
-// Add firebase to reducers
+// Root reducer
 const rootReducer = combineReducers({
   firebase: firebaseReducer,
   firestore: firestoreReducer,
@@ -15,9 +17,12 @@ const rootReducer = combineReducers({
   navigation: navigationReducer,
 });
 
-// Create store with reducers and initial state
-const initialState = {};
-export const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
+// Areas should be persisted to reduce OpenApi calls
+const persistConfig = {
+  key: "areas",
+  storage: localforage,
+};
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // react-redux-firebase config
 const rrFirebaseConfig = {
@@ -25,11 +30,16 @@ const rrFirebaseConfig = {
   useFirestoreForProfile: true, // Firestore for Profile instead of Realtime DB
 };
 
+// Create store with reducers and initial state + persistor
+const initialState = {};
+export type RootState = ReturnType<typeof rootReducer>;
+export const store = createStore(persistedReducer, initialState, applyMiddleware(thunk));
+export const persistor = persistStore(store);
+
+// react-redux-firebase props for RRF provider
 export const rrfProps = {
   firebase,
   config: rrFirebaseConfig,
   dispatch: store.dispatch,
   createFirestoreInstance, // <- needed if using firestore
 };
-
-export type RootState = ReturnType<typeof rootReducer>;
