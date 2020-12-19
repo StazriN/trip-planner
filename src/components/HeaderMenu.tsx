@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
   link: { textDecoration: "none", color: theme.palette.secondary.dark },
-  listIcon: { color: theme.palette.secondary.main, opacity: "0.80" },
+  listIcon: { color: theme.palette.secondary.dark, opacity: "0.80" },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -158,7 +158,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
               </>
             )}
             {Object.keys(menuList).map((key, index) => (
-              <Link className={classes.link} to={`/map/${key}`}>
+              <Link key={index} className={classes.link} to={`/map/${key}`}>
                 <ListItem button key={index + 3}>
                   <ListItemIcon>
                     <ExploreIcon className={classes.listIcon} />

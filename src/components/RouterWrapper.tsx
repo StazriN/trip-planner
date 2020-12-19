@@ -10,13 +10,13 @@ import Trips from "../pages/Trips";
 import Login from "../pages/Login";
 import Notfound from "../pages/NotFound";
 import Map from "../pages/Map";
-import PlanTrip from "../pages/PlanTrip";
+import PlanTrip from "./PlanTrip";
 import TripDetail from "../pages/TripDetail";
 
 const useStyles = makeStyles((theme) => ({
   main: {
     textAlign: "center",
-    backgroundColor: "#2a0f3e30",
+    //backgroundColor: "#2a0f3e30",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -43,10 +43,9 @@ const RouterWrapper: FC = () => {
         ) : (
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/map/:areaType" exact render={({match}) => <Map areaType={match.params.areaType}/>}/>
+            <Route path="/map/:areaType" exact render={({ match }) => <Map areaType={match.params.areaType} />} />
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
-            <Route path="/plan-trip" exact component={PlanTrip} />
             <Route path="/trip-detail" exact component={TripDetail} />
             <Route component={Notfound} />
           </Switch>

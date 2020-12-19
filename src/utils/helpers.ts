@@ -1,4 +1,5 @@
 import { LatLngTuple } from "leaflet";
+import { IWindowSize } from "../hooks/useWindowSize";
 import { ActionStrings } from "../redux/types";
 import { AreasApis, AreaType, Geometry } from "./types";
 
@@ -53,6 +54,11 @@ export const getEndpoint = (area: AreaType) => {
   }
 };
 
+export const checkValidArea = (area: string) => {
+  const areas = ["birdAreas", "largeProtectedAreas", "smallAreas", "euAreas", "geoparks", "bioAreas"];
+  return areas.includes(area);
+};
+
 export const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export const formatDateToDate = (value: Date): string => {
@@ -61,4 +67,8 @@ export const formatDateToDate = (value: Date): string => {
   var yyyy = value.getFullYear().toString();
 
   return (dd < 10 ? "0" + dd.toString() : dd.toString()) + "." + (mm < 10 ? "0" + mm.toString() : mm.toString()) + "." + yyyy;
+};
+
+export const isMobileMode = (windowSize: IWindowSize) => {
+  return windowSize.width !== undefined && windowSize.width < 800;
 };

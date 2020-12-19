@@ -2,12 +2,12 @@ import { Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Grid
 import React, { FC } from "react";
 import bImg from "../assets/jpg/331643-Firewatch-sunset-forest-mountain.jpg";
 import { useHistory } from "react-router-dom";
-import birdArea from "../assets/jpg/areacards/hlubockeObory.jpg"
-import largeProtectedArea from "../assets/jpg/areacards/jesenniky.jpg"
-import smallArea from "../assets/jpg/areacards/libickyLuh.jpg"
-import euArea from "../assets/jpg/areacards/krkonose.jpg"
-import geopark from "../assets/jpg/areacards/ceskyRaj.jpg"
-import bioArea from "../assets/jpg/areacards/bileKarpaty.jpg"
+import birdArea from "../assets/jpg/areacards/hlubockeObory.jpg";
+import largeProtectedArea from "../assets/jpg/areacards/jesenniky.jpg";
+import smallArea from "../assets/jpg/areacards/libickyLuh.jpg";
+import euArea from "../assets/jpg/areacards/krkonose.jpg";
+import geopark from "../assets/jpg/areacards/ceskyRaj.jpg";
+import bioArea from "../assets/jpg/areacards/bileKarpaty.jpg";
 
 const useStyles = makeStyles((theme) => ({
   backDiv: {
@@ -28,29 +28,32 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
   },
   card: {
-    height: "100%"
+    height: "100%",
+    color: theme.palette.secondary.dark,
   },
   media: {
     height: "180px",
+    width: "100%",
   },
   cardActions: {
     display: "flex",
-    justifyContent: "center"
+    flexFlow: "column",
+    alignItems: "flex-start",
   },
   gridContainer: {
     marginTop: "30px",
     marginLeft: "auto",
     marginRight: "auto",
-    width: "90%"
+    width: "90%",
   },
 }));
 
 type AreaCard = {
-  name: string,
-  description: string,
-  image: string,
-  onSelect: () => void
-}
+  name: string;
+  description: string;
+  image: string;
+  onSelect: () => void;
+};
 
 const Home: FC = () => {
   const classes = useStyles();
@@ -63,77 +66,71 @@ const Home: FC = () => {
         name: "Bird Areas",
         description: "Areas identified using an internationally agreed set of criteria as being globally important for the conservation of bird populations.",
         image: birdArea,
-        onSelect: () => history.push("/map/birdAreas")
+        onSelect: () => history.push("/map/birdAreas"),
       },
       {
         name: "Large Protected Areas",
         description: "Large locations which receive protection because of their recognized natural, ecological or cultural values.",
         image: largeProtectedArea,
-        onSelect: () => history.push("/map/largeProtectedAreas")
+        onSelect: () => history.push("/map/largeProtectedAreas"),
       },
       {
         name: "Small Protected Areas",
         description: "Smaller locations which receive protection because of their recognized natural, ecological or cultural values.",
         image: smallArea,
-        onSelect: () => history.push("/map/smallAreas")
+        onSelect: () => history.push("/map/smallAreas"),
       },
       {
         name: "Natura 2000 EU protected areas",
         description: "Natura 2000 is a network of protected areas covering Europe's most valuable and threatened species and habitats.",
         image: euArea,
-        onSelect: () => history.push("/map/euAreas")
+        onSelect: () => history.push("/map/euAreas"),
       },
       {
         name: "Geoparks",
-        description: "Unified areas that advances the protection and use of geological heritage in a sustainable way, and promotes the economic well-being of the people who live there.",
+        description:
+          "Unified areas that advances the protection and use of geological heritage in a sustainable way, and promotes the economic well-being of the people who live there.",
         image: geopark,
-        onSelect: () => history.push("/map/geoparks")
+        onSelect: () => history.push("/map/geoparks"),
       },
       {
         name: "Biospehere Reserves",
-        description: "Sites for testing interdisciplinary approaches to understanding and managing changes and interactions between social and ecological systems, including conflict prevention and management of biodiversity.",
+        description:
+          "Sites for testing interdisciplinary approaches to understanding and managing changes and interactions between social and ecological systems, including conflict prevention and management of biodiversity.",
         image: bioArea,
-        onSelect: () => history.push("/map/bioAreas")
+        onSelect: () => history.push("/map/bioAreas"),
       },
-    ]
-  }
+    ];
+  };
   //TODO ak background = cover tak tu img div nemusi byt
 
   return (
     <>
       <Typography className={classes.title}>Trip Planner</Typography>
-        <Typography variant={"h5"} className={classes.subtitle}>
-          Plan your trip, write down notes, store memories and much more with Trip Planner!
-        </Typography>
-        <Grid container spacing={5} justify={"center"} className={classes.gridContainer} alignItems={"stretch"}>
-          {getAreas().map(areaCard => {
-            return (
-              <Grid item md={4} sm={6}>
-                <Card className={classes.card}>
-                  <CardActionArea>
-                    <CardMedia
-                      className={classes.media}
-                      image={areaCard.image}
-                      title="Contemplative Reptile"
-                    />
-                    <CardContent>
-                      <Typography gutterBottom variant="h5" component="h2">
-                        {areaCard.name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" component="p">
-                        {areaCard.description}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                  <CardActions className={classes.cardActions}>
-                    <Button size="small" color="primary" onClick={areaCard.onSelect}>
-                      Show on Map
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>)
-          })}
-        </Grid>
+      <Typography variant={"h5"} className={classes.subtitle}>
+        Plan your trip, write down notes, store memories and much more with Trip Planner!
+      </Typography>
+      <Grid container spacing={5} justify={"center"} className={classes.gridContainer} alignItems={"stretch"}>
+        {getAreas().map((areaCard) => {
+          return (
+            <Grid item md={4} sm={6}>
+              <Card className={classes.card}>
+                <CardActionArea className={classes.cardActions} onClick={areaCard.onSelect}>
+                  <CardMedia className={classes.media} image={areaCard.image} title="Contemplative Reptile" />
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="h2">
+                      {areaCard.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" component="p">
+                      {areaCard.description}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          );
+        })}
+      </Grid>
       <div className={classes.backDiv} />
     </>
   );
