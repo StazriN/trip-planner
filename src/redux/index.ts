@@ -2,7 +2,7 @@ import firebase from "firebase/app";
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import { firebaseReducer } from "react-redux-firebase";
 import { createFirestoreInstance, firestoreReducer } from "redux-firestore";
-import { areasReducer, navigationReducer, selectedTripReducer, weatherReducer } from "./reducers";
+import { areasReducer, navigationReducer, weatherReducer } from "./reducers";
 import thunk from "redux-thunk";
 import localforage from "localforage"; // Improves the offline experience (default storage can't handle large JSONs with geo data...)
 import { persistStore, persistReducer } from "redux-persist";
@@ -12,7 +12,6 @@ const rootReducer = combineReducers({
   firebase: firebaseReducer,
   firestore: firestoreReducer,
   areas: areasReducer,
-  selectedTrip: selectedTripReducer,
   weather: weatherReducer,
   navigation: navigationReducer,
 });

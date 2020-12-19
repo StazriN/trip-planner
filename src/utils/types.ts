@@ -49,14 +49,17 @@ export type Geometry = {
 
 export type AreaFeature = {
   attributes: {
-    OBJECTID: number;
-    NAZEV: string;
+    OBJECTID: number,
+    NAZEV: string,
+    NAZEV_GP: string,
+    NAZEV_BR: string,
   };
   geometry: Geometry;
 };
 
 export type AreaData = {
   features: [AreaFeature];
+  displayFieldName: "NAZEV" | "NAZEV_BR" | "NAZEV_GP";
 };
 
 export class WeatherInfo {
@@ -75,7 +78,8 @@ export class WeatherInfo {
 
 export type panelContextType = "menu" | "weather";
 
-export type AreaType = "birdAreas" | "largeProtectedAreas" | "smallAreas" | "euAreas" | "geoparks" | "bioAreas";
+export const AreaTypeArray = ["birdAreas", "largeProtectedAreas", "smallAreas", "euAreas", "geoparks", "bioAreas"] as const;
+export type AreaType = typeof AreaTypeArray[number];
 
 export type MenuItemsType = Record<AreaType, string>;
 

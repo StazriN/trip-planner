@@ -4,7 +4,6 @@ import { store } from "../redux";
 import { setClickedArea, setWeatherLocation } from "../redux/actions";
 import { AreaData, AreaFeature, ClickedArea, Geometry } from "../utils/types";
 import { LatLngExpression, LatLngTuple } from "leaflet";
-import { useHistory } from "react-router-dom";
 import { findMeCenter } from "../utils/helpers";
 
 export interface IPolygonsMapperProps {
@@ -13,8 +12,6 @@ export interface IPolygonsMapperProps {
 }
 
 const PolygonsMapper: FC<IPolygonsMapperProps> = (props) => {
-  const history = useHistory();
-
   const normalizeGeometry = (geometry: Geometry) => {
     return geometry.rings[0].map((point) => [point[1], point[0]] as LatLngExpression);
   };
@@ -24,9 +21,9 @@ const PolygonsMapper: FC<IPolygonsMapperProps> = (props) => {
   };
 
   const onPolygonClickHandler = (feature: AreaFeature) => {
-    const { NAZEV, OBJECTID } = feature.attributes;
-    store.dispatch(setWeatherLocation(NAZEV, OBJECTID, findMeCenter(feature.geometry)));
-    store.dispatch(setClickedArea(new ClickedArea(OBJECTID, NAZEV, getFirstPosition(feature.geometry))));
+    const { OBJECTID } = feature.attributes;
+    store.dispatch(setWeatherLocation(feature.attributes[props.area.displayFieldName], OBJECTID, findMeCenter(feature.geometry)));
+    store.dispatch(setClickedArea(new ClickedArea(OBJECTID, feature.attributes[props.area.displayFieldName], getFirstPosition(feature.geometry))));
     props.onPlanDisplay();
   };
 

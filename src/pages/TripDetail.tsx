@@ -10,15 +10,14 @@ import {
   makeStyles, Paper, Snackbar, TextareaAutosize, TextField
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import { connect, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../redux";
-import { useFirestore } from "react-redux-firebase";
+import { useFirestore, useFirestoreConnect } from "react-redux-firebase";
 import { useHistory } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
-import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
 import { storage } from '../index'
-import firebase from 'firebase';
+import Notfound from "./NotFound";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -59,20 +58,14 @@ const useStyles = makeStyles(theme => ({
     height: 'auto',
     display: 'block',
   }
-}))
+}));
 
-const mapStateToProps = ({ selectedTrip }: RootState) => {
-  return { selectedTrip };
-};
-
-type TripDetailProps = ReturnType<typeof mapStateToProps>;
-
-const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
+const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   const classes = useStyles();
 
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
   const [trip, setTrip] = useState<Trip>();
-  const [name, setName] = useState<string>();
+  const [name, setName] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState<Array<string>>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -80,48 +73,52 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
 
   const [pictures, setPictures] = useState<Array<string>>([]);
   const [file, setFile] = useState<File>();
-  const [url, setURL] = useState("");
+  const [notFound, setNotFound] = useState<boolean>(false);
 
   const firestore = useFirestore();
   const history = useHistory();
 
+  useFirestoreConnect({
+    collection: `users/${uid}/trips`,
+    storeAs: "trips",
+  });
+
   const trips: Array<Trip> = useSelector((state: RootState) => state.firestore.data.trips);
 
   useEffect(() => {
-    if (selectedTrip?.id) {
-      setTrip(Object.values(trips).find(trip => trip.id === selectedTrip.id))
+    if (trips) {
+      const trip = Object.values(trips).find(trip => trip.id === tripId)
+      if (trip) {
+        setTrip(trip)
+      } else {
+        setNotFound(true);
+      }
     }
-  }, [selectedTrip, trips])
+  }, [tripId, trips])
 
   useEffect(() => {
+    const downloadImagesAsync = async (tripId: string) => {
+      const list = await storage.ref(`/users/${uid}/images/${tripId}/`).listAll();
+      const pictures: Array<string> = [];
+
+      await list.items.reduce(async (promise, imageRef) => {
+        await promise;
+        const url = await imageRef.getDownloadURL()
+        pictures.push(url);
+      }, Promise.resolve());
+
+      return pictures;
+    };
+
     if (trip) {
       setName(trip.name)
       setDate(trip.date.toDate())
       setNotes(trip.notes)
-      downloadImages(trip.id)
+      downloadImagesAsync(trip.id)
+        .then(pictures => setPictures(pictures))
+        .catch(err => console.log(err))
     }
-  }, [trip]);
-
-  const downloadImages = (tripId: string) => {
-    storage.ref(`/images/${tripId}/`).listAll().then(result => {
-      const numOfPics = result.items.length;
-      const urls: Array<string> = [];
-
-      result.items.forEach(imageRef => {
-        imageRef.getDownloadURL().then(url => {
-          urls.push(url);
-
-          // All urls downloaded
-          if (urls.length === numOfPics) {
-            setPictures(urls)
-          }
-        });
-      });
-    }).catch(
-      error => {
-        throw new Error(error);
-      });
-  }
+  }, [trip, uid]);
 
   const onNoteChange = (index: number, e: any) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
@@ -152,10 +149,6 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
   };
 
   const onDeleteClick = () => {
-    if (!selectedTrip?.id) {
-      return
-    }
-
     setConfirmDeleteOpen(true)
   }
 
@@ -164,20 +157,25 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
   }
 
   function handleUpload() {
-    if (!file) {
+    if (!file || !trip) {
       return
     }
-    const uploadTask = storage.ref(`/images/${trip?.id}/${file.name}`).put(file);
-    uploadTask.on("state_changed", console.log, console.error, () => {
-      storage
-        .ref("images")
-        .child(file.name)
-        .getDownloadURL()
-        .then((url) => {
-          setFile({} as File);
-          setURL(url);
-        });
-    });
+
+    storage.ref(`/users/${uid}/images/${trip.id}/${file.name}`)
+      .put(file)
+      .on("state_changed", console.log, console.error, () => {
+        storage
+          .ref("users")
+          .child(uid)
+          .child("images")
+          .child(trip.id)
+          .child(file.name)
+          .getDownloadURL()
+          .then((url) => {
+            setFile({} as File)
+            setPictures([...pictures, url])
+          });
+      });
   }
 
   const onDeleteConfirm = () => {
@@ -185,7 +183,7 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
       .collection('users')
       .doc(uid)
       .collection('trips')
-      .doc(selectedTrip.id)
+      .doc(tripId)
       .delete()
       .then(() => history.push('/trips'))
   }
@@ -198,9 +196,14 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
     setSnackbarOpen(false)
   }
 
+  // Trip not found
+  if (notFound) {
+    return <Notfound />
+  }
+
   return (
     <>
-      {!trip && <CircularProgress className={classes.loader}/>}
+      {!trip && <CircularProgress className={classes.loader} />}
       {trip &&
       <Paper className={classes.paper}>
         <Typography variant={'h4'}>
@@ -209,12 +212,12 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         <Grid container direction={'column'}>
           <Grid item>
             <Typography variant={'h5'} align={'left'}>Name:</Typography>
-            <TextField value={name} className={classes.nameInput} onChange={(e) => setName(e.target.value)}/>
+            <TextField value={name} className={classes.nameInput} onChange={(e) => setName(e.target.value)} />
           </Grid>
           <Grid item>
             <Typography variant={'h5'} align={'left'}>Trip Date:</Typography>
             <Grid item className={classes.dateInputContainer}>
-              <DatePicker className={classes.dateInput} selected={date} onChange={(date: Date | null) => setDate(date ?? new Date())}/>
+              <DatePicker className={classes.dateInput} selected={date} onChange={(date: Date | null) => setDate(date ?? new Date())} />
             </Grid>
           </Grid>
           {/*Notes*/}
@@ -222,14 +225,14 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
             <Typography variant={'h5'} align={'left'}>Notes:</Typography>
             {notes.map((note, index) => (
               <Grid item>
-                <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)}/>
+                <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)} />
               </Grid>
             ))}
           </Grid>
           {/*Add Note*/}
           <Grid item>
             <Fab onClick={onAddNoteClick} className={classes.fab}>
-              <AddIcon/>
+              <AddIcon />
             </Fab>
           </Grid>
         </Grid>
@@ -243,7 +246,7 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
                 ))} */}
             {pictures.map((picture) => (
               <Grid item>
-                <img className={classes.image} src={`${picture}`} height={200} width={200}/>
+                <img className={classes.image} src={`${picture}`} height={200} width={200} />
               </Grid>
             ))
             }
@@ -256,9 +259,8 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
             <Typography variant={'h5'} align={'left'}>Upload Picture:</Typography>
             <Grid item>
               <form>
-                <input type="file" onChange={handleImageChange}/>
+                <input type="file" onChange={handleImageChange} />
               </form>
-              <img src={url} alt=""/>
             </Grid>
           </Grid>
         </Grid>
@@ -266,12 +268,12 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         <Grid container alignItems={'flex-start'} spacing={1}>
           <Grid item>
             <Fab onClick={onSaveClick}>
-              <SaveIcon/>
+              <SaveIcon />
             </Fab>
           </Grid>
           <Grid item>
             <Fab onClick={onDeleteClick} className={classes.delete}>
-              <RemoveIcon/>
+              <RemoveIcon />
             </Fab>
           </Grid>
         </Grid>
@@ -289,15 +291,15 @@ const TripDetail: FC<TripDetailProps> = ({ selectedTrip }) => {
         action={
           <>
             <IconButton size="small" aria-label="close" color="inherit" onClick={onSnackbarClose}>
-              <CloseIcon fontSize="small"/>
+              <CloseIcon fontSize="small" />
             </IconButton>
           </>
         }
       />
       {/*Confirm delete dialog*/}
-      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen}/>
+      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} />
     </>
   );
 }
 
-export default connect(mapStateToProps)(TripDetail);
+export default TripDetail;

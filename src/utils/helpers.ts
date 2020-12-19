@@ -1,7 +1,7 @@
 import { LatLngTuple } from "leaflet";
 import { IWindowSize } from "../hooks/useWindowSize";
 import { ActionStrings } from "../redux/types";
-import { AreasApis, AreaType, Geometry } from "./types";
+import { AreasApis, AreaType, AreaTypeArray, Geometry } from "./types";
 
 export const compressAreasCoordinates = (data: any, takeEvery: number) => {
   if (data?.features?.length > 0) {
@@ -68,6 +68,10 @@ export const formatDateToDate = (value: Date): string => {
 
   return (dd < 10 ? "0" + dd.toString() : dd.toString()) + "." + (mm < 10 ? "0" + mm.toString() : mm.toString()) + "." + yyyy;
 };
+
+export const isValidAreaType = (str: AreaType): boolean => {
+  return AreaTypeArray.includes(str)
+}
 
 export const isMobileMode = (windowSize: IWindowSize) => {
   return windowSize.width !== undefined && windowSize.width < 800;
