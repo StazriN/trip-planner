@@ -53,7 +53,7 @@ const RouterWrapper: FC = () => {
             <Route path="/trips" exact component={Trips} />
             <Route path="/login" exact component={Login} />
             <Route path="/plan-trip" exact component={PlanTrip} />
-            <Route path="/trip-detail" exact component={TripDetail} />
+            <Route path="/trip-detail/:id" exact render={({match}) => <TripDetail tripId={match.params.id} />} />
             <Route component={Notfound} />
           </Switch>
         )}

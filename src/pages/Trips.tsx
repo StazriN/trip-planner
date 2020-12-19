@@ -15,7 +15,6 @@ import {useSelector} from "react-redux";
 import {RootState, store} from "../redux";
 import {useFirestore, useFirestoreConnect} from "react-redux-firebase";
 import {useHistory} from "react-router-dom";
-import {setSelectedTripId} from "../redux/actions";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,8 +49,7 @@ const Trips: FC = () => {
   const trips: Array<Trip> = useSelector((state: RootState) => state.firestore.data.trips);
 
   const onTripDetailClick = (id: string) => {
-    store.dispatch(setSelectedTripId(id))
-    history.push('/trip-detail')
+    history.push(`/trip-detail/${id}`)
   }
 
   return (

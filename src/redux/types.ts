@@ -16,10 +16,6 @@ export interface IAreasState {
   clickedArea?: ClickedArea;
 }
 
-export interface ISelectedTripState {
-  id?: string;
-}
-
 export interface IWeatherState {
   displayedLocation: { name: string; id: number };
   displayedLocationCoordinates: LatLngTuple;
@@ -42,9 +38,7 @@ export enum ActionStrings {
   BIO_AREAS_DOWNLOADED = "BIO_AREAS_DOWNLOADED",
   SET_DOWNLOADING = "SET_DOWNLOADING",
   SET_CLICKED_AREA = "SET_CLICKED_AREA",
-  // TRIPS
-  SET_SELECTED_TRIP_ID = "SET_SELECTED_TRIP_ID",
-  // WRATHER
+  // WEATHER
   DOWNLOAD_WEATHER = "DOWNLOAD_WEATHER",
   SET_WEATHER_LOCATION = "SET_WEATHER_LOCATION",
   REINITIALIZE_WEATHER = "REINITIALIZE_WEATHER",

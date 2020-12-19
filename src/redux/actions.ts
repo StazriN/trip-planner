@@ -37,12 +37,6 @@ export function setClickedArea(clickedArea: ClickedArea) {
   return action(ActionStrings.SET_CLICKED_AREA, { clickedArea });
 }
 
-/*************************************************** TRIPS ************************************************************/
-
-export function setSelectedTripId(id: string) {
-  return action(ActionStrings.SET_SELECTED_TRIP_ID, { id });
-}
-
 /*************************************************** WEATHER ************************************************************/
 
 export function downloadWeather(data: any, areaName: string, areaId: number) {
