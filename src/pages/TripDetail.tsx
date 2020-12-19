@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Trip } from "../utils/types";
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Delete';
@@ -18,7 +18,6 @@ import DatePicker from "react-datepicker";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import { storage } from '../index'
 import Notfound from "./NotFound";
-import firebase from "firebase/app";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -74,7 +73,6 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
   const [pictures, setPictures] = useState<Array<string>>([]);
   const [file, setFile] = useState<File>();
-  const [url, setURL] = useState("");
   const [notFound, setNotFound] = useState<boolean>(false);
 
   const firestore = useFirestore();
@@ -98,20 +96,20 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     }
   }, [tripId, trips])
 
-  const downloadImagesAsync = async (tripId: string) => {
-    const list = await storage.ref(`/images/${tripId}/`).listAll();
-    const pictures: Array<string> = [];
-
-    await list.items.reduce(async (promise, imageRef) => {
-      await promise;
-      const url = await imageRef.getDownloadURL()
-      pictures.push(url);
-    }, Promise.resolve());
-
-    return pictures;
-  };
-
   useEffect(() => {
+    const downloadImagesAsync = async (tripId: string) => {
+      const list = await storage.ref(`/users/${uid}/images/${tripId}/`).listAll();
+      const pictures: Array<string> = [];
+
+      await list.items.reduce(async (promise, imageRef) => {
+        await promise;
+        const url = await imageRef.getDownloadURL()
+        pictures.push(url);
+      }, Promise.resolve());
+
+      return pictures;
+    };
+
     if (trip) {
       setName(trip.name)
       setDate(trip.date.toDate())
@@ -120,7 +118,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         .then(pictures => setPictures(pictures))
         .catch(err => console.log(err))
     }
-  }, [trip]);
+  }, [trip, uid]);
 
   const onNoteChange = (index: number, e: any) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
@@ -159,20 +157,25 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   }
 
   function handleUpload() {
-    if (!file) {
+    if (!file || !trip) {
       return
     }
-    const uploadTask = storage.ref(`/images/${trip?.id}/${file.name}`).put(file);
-    uploadTask.on("state_changed", console.log, console.error, () => {
-      storage
-        .ref("images")
-        .child(file.name)
-        .getDownloadURL()
-        .then((url) => {
-          setFile({} as File);
-          setURL(url);
-        });
-    });
+
+    storage.ref(`/users/${uid}/images/${trip.id}/${file.name}`)
+      .put(file)
+      .on("state_changed", console.log, console.error, () => {
+        storage
+          .ref("users")
+          .child(uid)
+          .child("images")
+          .child(trip.id)
+          .child(file.name)
+          .getDownloadURL()
+          .then((url) => {
+            setFile({} as File)
+            setPictures([...pictures, url])
+          });
+      });
   }
 
   const onDeleteConfirm = () => {
@@ -258,7 +261,6 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
               <form>
                 <input type="file" onChange={handleImageChange} />
               </form>
-              <img src={url} alt="" />
             </Grid>
           </Grid>
         </Grid>

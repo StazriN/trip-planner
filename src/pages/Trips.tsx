@@ -53,7 +53,7 @@ const Trips: FC = () => {
   }
 
   const downloadImage = async (tripId: string) => {
-    const list = await storage.ref(`/images/${tripId}/`).listAll()
+    const list = await storage.ref(`users/${uid}/images/${tripId}/`).listAll()
     if (list.items.length > 0) {
       const url = await list.items[0].getDownloadURL()
       return { id: tripId, image: url }
