@@ -22,7 +22,7 @@ export const compressAreasCoordinates = (data: any, takeEvery: number) => {
 };
 
 export const findMeCenter = (data: Geometry) => {
-  var [minX, minY, maxX, maxY] = [100000, 100000, 0, 0];
+  let [minX, minY, maxX, maxY] = [100000, 100000, 0, 0];
   const ring = data.rings[0];
 
   ring.forEach((tuple) => {
@@ -57,9 +57,9 @@ export const getEndpoint = (area: AreaType) => {
 export const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export const formatDateToDate = (value: Date): string => {
-  var dd = value.getDate();
-  var mm = value.getMonth() + 1;
-  var yyyy = value.getFullYear().toString();
+  const dd = value.getDate();
+  const mm = value.getMonth() + 1;
+  const yyyy = value.getFullYear().toString();
 
   return (dd < 10 ? "0" + dd.toString() : dd.toString()) + "." + (mm < 10 ? "0" + mm.toString() : mm.toString()) + "." + yyyy;
 };

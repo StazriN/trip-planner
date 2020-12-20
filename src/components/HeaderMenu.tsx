@@ -69,7 +69,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   const classes = useStyles(drawerSize);
 
   const handleDrawerToggle = () => {
-    var [context, open]: [panelContextType, boolean] = ["menu", true];
+    let [context, open]: [panelContextType, boolean] = ["menu", true];
     if (props.navigation.panelOpened) [context, open] = [props.navigation.panelContext, false];
     store.dispatch(setRightPanelContext(context, open));
   };

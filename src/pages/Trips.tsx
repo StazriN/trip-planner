@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import { Trip } from "../utils/types";
 import { Container, GridList, GridListTile, GridListTileBar, makeStyles } from "@material-ui/core";
 import TripPlaceholder from "../assets/jpg/TripPlaceholder.jpg";
@@ -31,6 +31,8 @@ const Trips: FC = () => {
 
   const history = useHistory();
   const classes = useStyles();
+
+  const isMounted = useRef(false);
 
   useFirestoreConnect({
     collection: `users/${uid}/trips`,
@@ -72,11 +74,22 @@ const Trips: FC = () => {
   }, [uid]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     if (trips) {
       downloadImagesAsync(trips)
-        .then((array) => setTripsImages(array))
+        .then((array) => {
+            if (isMounted.current) {
+              setTripsImages(array)
+            }
+          }
+        )
         .catch((err) => console.log(err));
     }
+
+    return () => {
+      isMounted.current = false;
+    };
   }, [trips, downloadImagesAsync]);
 
   const windowSize = useWindowSize();
@@ -90,8 +103,8 @@ const Trips: FC = () => {
           <GridList cellHeight={350} spacing={10} cols={columns}>
             {Object.values(trips).map((trip) => (
               trip && <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
-                <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name}/>
-                <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>}/>
+                <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
+                <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>} />
               </GridListTile>
             ))}
           </GridList>

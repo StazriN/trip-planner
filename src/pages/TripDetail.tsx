@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { Trip } from "../utils/types";
 import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Delete";
@@ -106,6 +106,9 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     display: "flex",
   },
+  imageGridListTile: {
+    cursor: "pointer"
+  }
 }));
 
 const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
@@ -133,6 +136,8 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
   const GalleryColumns = getPhotoColumns(windowSize);
 
+  const isMounted = useRef(false);
+
   useFirestoreConnect({
     collection: `users/${uid}/trips`,
     storeAs: "trips",
@@ -152,6 +157,8 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   }, [trips, tripId]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     const downloadImagesAsync = async (tripId: string) => {
       const list = await storage.ref(`/users/${uid}/images/${tripId}/`).listAll();
       const pictures: Array<string> = [];
@@ -170,8 +177,16 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
       setDate(trip.date.toDate());
       setNotes(trip.notes);
       downloadImagesAsync(trip.id)
-        .then((pictures) => setPictures(pictures))
+        .then((pictures) => {
+          if (isMounted.current) {
+            setPictures(pictures)
+          }
+        })
         .catch((err) => console.log(err));
+    }
+
+    return () => {
+      isMounted.current = false;
     }
   }, [trip, uid]);
 
@@ -191,6 +206,13 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   const onAddNoteClick = () => {
     setNotes(notes.concat(""));
   };
+
+  const openPhotoInNewTab = (url: string) => {
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+    if (newWindow) {
+      newWindow.opener = null
+    }
+  }
 
   const onSaveClick = () => {
     if (!trip) {
@@ -354,7 +376,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
                       Notes
                     </Typography>
                     {notes.map((note, index) => (
-                      <TextField id={`Note ${index + 1}`} label={`Note ${index + 1}`} fullWidth={true} multiline variant="outlined" className={classes.note} value={note} onChange={(e) => onNoteChange(index, e)} />
+                      <TextField key={`Note ${index + 1}`} label={`Note ${index + 1}`} fullWidth={true} multiline variant="outlined" className={classes.note} value={note} onChange={(e) => onNoteChange(index, e)} />
                     ))}
                   </Grid>
                   {/*Add Note*/}
@@ -398,7 +420,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
               </div>
               <GridList cellHeight={160} cols={GalleryColumns}>
                 {pictures.map((picture, index) => (
-                  <GridListTile key={index} cols={1}>
+                  <GridListTile key={index} cols={1} className={classes.imageGridListTile} onClick={() => openPhotoInNewTab(picture)}>
                     <img src={picture} alt={picture.split("/").pop()} />
                     <GridListTileBar
                       actionIcon={
