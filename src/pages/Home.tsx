@@ -28,6 +28,9 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     color: theme.palette.secondary.dark,
   },
+  gridItem: {
+    maxWidth: "400px",
+  },
   media: {
     height: "180px",
     width: "100%",
@@ -110,7 +113,7 @@ const Home: FC = () => {
       <Grid container spacing={5} justify={"center"} className={classes.gridContainer} alignItems={"stretch"}>
         {getAreas().map((areaCard) => {
           return (
-            <Grid item md={4} sm={6}>
+            <Grid className={classes.gridItem} item md={4} sm={6}>
               <Card className={classes.card}>
                 <CardActionArea className={classes.cardActions} onClick={areaCard.onSelect}>
                   <CardMedia className={classes.media} image={areaCard.image} title="Contemplative Reptile" />
