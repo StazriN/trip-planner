@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { useFirestore, useFirestoreConnect } from "react-redux-firebase";
 import { useHistory } from "react-router-dom";
-import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { storage } from '../index'
 import Notfound from "./NotFound";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
@@ -406,7 +406,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         }
       />
       {/*Confirm delete dialog*/}
-      <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} />
+      <ConfirmDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} text={"Are you sure you want to delete the trip?"}/>
 
 
     </>
