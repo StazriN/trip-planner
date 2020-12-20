@@ -16,11 +16,16 @@ import DateFnsUtils from "@date-io/date-fns";
 import CloseIcon from "@material-ui/icons/Close";
 import DoneIcon from "@material-ui/icons/Done";
 import CloudIcon from "@material-ui/icons/Cloud";
-import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
+import { useWindowSize } from "../hooks/useWindowSize";
 import { isMobileMode } from "../utils/helpers";
 import MuiAlert from "@material-ui/lab/Alert";
+import ExploreIcon from "@material-ui/icons/Explore";
 
 const useStyles = makeStyles((theme) => ({
+  mainCard: {
+    height: "100%",
+    overflow: "auto",
+  },
   notchedOutline: {
     borderColor: theme.palette.primary.dark,
   },
@@ -32,14 +37,15 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "4px",
     marginLeft: "2px",
     marginRight: "2px",
-    width: (windowSize: IWindowSize) => (windowSize?.width !== undefined && windowSize?.width > 800 ? "calc(50% - 4px)" : "calc(100% - 12px)"),
+    width: "calc(100% - 12px)",
   },
   paper: {
     backgroundColor: "#ffffffad",
     marginBottom: "5px",
   },
   areaTitle: {
-    paddingTop: "10px",
+    paddingTop: "5px",
+    paddingBottom: "5px",
     color: theme.palette.primary.dark,
   },
 
@@ -118,24 +124,25 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
         });
       })
       .then(() => history.push("/trips"))
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   };
 
   return (
     <>
-      <Card style={{ height: "100%", opacity: areas.clickedArea ? 1 : 0.7 }}>
+      <Card className={classes.mainCard} style={{ opacity: areas.clickedArea ? 1 : 0.7 }}>
         {areas.clickedArea ? (
           <>
             <CardContent>
+              <ExploreIcon />
+              <Typography color="secondary" variant="h6" component="h1">
+                Plan your trip to:
+              </Typography>
+
               <Paper className={classes.paper}>
-                <Typography color="secondary" variant="h6" component="h1">
-                  Plan your trip to:
+                <Typography className={classes.areaTitle} color="secondary" variant="h5">
+                  {areas.clickedArea.name}
                 </Typography>
               </Paper>
-
-              <Typography className={classes.areaTitle} color="secondary" variant="h5">
-                {areas.clickedArea.name}
-              </Typography>
               <TextField
                 InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
                 label="Name"
@@ -176,14 +183,14 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
             </CardContent>
             <CardActions disableSpacing className={classes.actionArea}>
               {mobileOn && (
-                <Button className={classes.button} color="secondary" variant="outlined" startIcon={<CloseIcon />} onClick={onClose}>
+                <Button className={classes.button} color="primary" variant="contained" startIcon={<CloseIcon />} onClick={onClose}>
                   Close
                 </Button>
               )}
-              <Button className={classes.button} color="secondary" variant="outlined" startIcon={<DoneIcon />} onClick={submit}>
+              <Button className={classes.button} color="primary" variant="contained" startIcon={<DoneIcon />} onClick={submit}>
                 Submit
               </Button>
-              <Button className={classes.button} color="primary" variant="outlined" startIcon={<CloudIcon />} onClick={openWeather}>
+              <Button className={classes.button} color="secondary" variant="contained" startIcon={<CloudIcon />} onClick={openWeather}>
                 Weather
               </Button>
             </CardActions>

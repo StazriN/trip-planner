@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { Map as MapContainer, TileLayer } from "react-leaflet";
-import { CircularProgress, Container, makeStyles } from "@material-ui/core";
+import { CircularProgress, Container, fade, makeStyles } from "@material-ui/core";
 import { LatLngTuple } from "leaflet";
 import { RootState, store } from "../redux";
 import { downloadArea } from "../redux/thunks";
@@ -23,18 +23,20 @@ interface IRatio {
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
     display: "flex",
-    marginTop: "5vh",
+    paddingBottom: "2vh",
+    paddingTop: "5vh",
     paddingLeft: "5px !important",
     paddingRight: "10px !important",
+    backgroundColor: fade(theme.palette.secondary.main, 0.3),
   },
   dialogContainer: {
-    width: (drawerSize: IRatio) => drawerSize.widthDialog,
+    maxWidth: (drawerSize: IRatio) => drawerSize.widthDialog,
     height: "75vh",
     paddingLeft: "5px !important",
     paddingRight: "5px !important",
   },
   mapContainer: {
-    width: (drawerSize: IRatio) => drawerSize.widthMap,
+    maxWidth: (drawerSize: IRatio) => drawerSize.widthMap,
     height: "75vh",
     paddingLeft: "5px !important",
     paddingRight: "5px !important",
@@ -75,7 +77,7 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
   const windowSize = useWindowSize();
   const mobileOn = isMobileMode(windowSize);
 
-  const size: IRatio = !mobileOn ? { widthDialog: "40%", widthMap: "60%" } : { widthDialog: "100%", widthMap: "100%" };
+  const size: IRatio = !mobileOn ? { widthDialog: "400px", widthMap: "none" } : { widthDialog: "100%", widthMap: "100%" };
   const classes = useStyles(size);
 
   useEffect(() => {

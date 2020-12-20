@@ -7,7 +7,6 @@ import HeaderMenu from "./HeaderMenu";
 import { RootState } from "../redux";
 import Home from "../pages/Home";
 import Trips from "../pages/Trips";
-import Login from "../pages/Login";
 import Notfound from "../pages/NotFound";
 import Map from "../pages/Map";
 import PlanTrip from "./PlanTrip";
@@ -35,8 +34,8 @@ const RouterWrapper: FC = () => {
   const classes = useStyles();
 
   const renderMapByAreaType = (areaType: AreaType) => {
-    return isValidAreaType(areaType) ? <Map areaType={areaType} /> : <Notfound />
-  }
+    return isValidAreaType(areaType) ? <Map areaType={areaType} /> : <Notfound />;
+  };
 
   return (
     <Router>
@@ -51,9 +50,8 @@ const RouterWrapper: FC = () => {
             <Route path="/" exact component={Home} />
             <Route path="/map/:areaType" exact render={({ match }) => renderMapByAreaType(match.params.areaType)} />
             <Route path="/trips" exact component={Trips} />
-            <Route path="/login" exact component={Login} />
             <Route path="/plan-trip" exact component={PlanTrip} />
-            <Route path="/trip-detail/:id" exact render={({match}) => <TripDetail tripId={match.params.id} />} />
+            <Route path="/trip-detail/:id" exact render={({ match }) => <TripDetail tripId={match.params.id} />} />
             <Route component={Notfound} />
           </Switch>
         )}
