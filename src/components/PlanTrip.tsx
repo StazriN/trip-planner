@@ -1,6 +1,5 @@
 import { connect, useSelector } from "react-redux";
-import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
+import React, { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { useHistory } from "react-router-dom";
 import { RootState, store } from "../redux";
@@ -8,10 +7,10 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import { CardActions, makeStyles, Paper, TextareaAutosize } from "@material-ui/core";
+import { CardActions, makeStyles, Paper, Snackbar } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import { useFirestore } from "react-redux-firebase";
-import { reinitializeWeather, setRightPanelContext, setWeatherLocation } from "../redux/actions";
+import { reinitializeWeather, setRightPanelContext } from "../redux/actions";
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import CloseIcon from "@material-ui/icons/Close";
@@ -19,6 +18,7 @@ import DoneIcon from "@material-ui/icons/Done";
 import CloudIcon from "@material-ui/icons/Cloud";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import { isMobileMode } from "../utils/helpers";
+import MuiAlert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => ({
   notchedOutline: {
@@ -65,6 +65,7 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
   const [name, setName] = useState<string>("My Trip");
   const [date, setDate] = useState<Date>(new Date());
   const [note, setNote] = useState<string>("I should take some beers...");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const history = useHistory();
   const firestore = useFirestore();
@@ -93,8 +94,8 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
 
   const submit = () => {
     const area = areas.clickedArea;
-
-    if (!area) {
+    if (!area || name === "" || isNaN(date.getDate())) {
+      setSnackbarOpen(true);
       return;
     }
 
@@ -191,6 +192,19 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
           </Typography>
         )}
       </Card>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+          >
+            <MuiAlert severity="error" elevation={6} variant="filled" onClose={() => setSnackbarOpen(false)} >
+              Please fill trip name and date properly.
+            </MuiAlert>
+      </Snackbar>
     </>
   );
 };
