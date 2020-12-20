@@ -206,6 +206,34 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     setConfirmDeleteOpen(false)
   }
 
+  const deleteFromPictures = (pic: string) => {
+    const index = pictures.indexOf(pic, 0);
+    if (index > -1) {
+      pictures.splice(index, 1);
+    }
+    return pictures;
+  }
+
+  const deletePicture = (picture: string) => {
+    if (!trip) { return };
+    const imagePath: string = getPathStorageFromUrl(picture);
+    storage.ref(`${imagePath}`).delete().then(function () {
+      setPictures([...deleteFromPictures(picture)])
+    }).catch(function (error) {
+      console.log('delete fail ', error);
+      throw new Error(error);
+    });
+  }
+
+  function getPathStorageFromUrl(url: String) {
+    const baseUrl = "https://firebasestorage.googleapis.com/v0/b/trip-planner-831cc.appspot.com/o/";
+    let imagePath: string = url.replace(baseUrl, "");
+    const indexOfEndPath = imagePath.indexOf("?");
+    imagePath = imagePath.substring(0, indexOfEndPath);
+    imagePath = imagePath.replaceAll("%2F", "/");
+    return imagePath;
+  }
+
   // Trip not found
   if (notFound) {
     return <Notfound />
@@ -282,7 +310,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
             <Typography variant={'h5'} align={'left'}>Photos</Typography>
             {pictures.map((picture, index) => (
               <Grid item>
-                <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} />
+                <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => deletePicture(picture)}/>
               </Grid>
             ))}
             <Grid item>
