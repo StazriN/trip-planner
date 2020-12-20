@@ -79,3 +79,14 @@ export const getGridColumns = (windowSize: IWindowSize) => {
   if (windowSize.width > 460) return 2;
   return 1;
 };
+
+export const getPhotoColumns = (windowSize: IWindowSize) => {
+  if (windowSize.width === undefined) return 0;
+  if (windowSize.width > 1400) return 4;
+  if (windowSize.width > 1160) return 3;
+  if (windowSize.width > 1000) return 2;
+  if (windowSize.width >= 800) return 1;
+  if (windowSize.width > 560) return 3;
+  if (windowSize.width > 400) return 2;
+  return 1;
+};

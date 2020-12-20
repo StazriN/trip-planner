@@ -15,7 +15,7 @@ import { useWindowSize } from "../hooks/useWindowSize";
 const mapCenter: LatLngTuple = [49.817493, 15.472962];
 const zoom: number = 7;
 
-interface IRatio {
+export interface IRatio {
   widthDialog: string;
   widthMap: string;
 }
@@ -107,10 +107,7 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
         <Container className={classes.mapContainer} maxWidth={false}>
           {isSelectedAreaDownloading() && <CircularProgress className={classes.loader} />}
           <MapContainer id="mapId" center={mapCenter} zoom={zoom} className={[classes.map, isSelectedAreaDownloading() ? classes.lowOpacity : ""].join(" ")}>
-            <TileLayer
-              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-            />
+            <TileLayer attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}" />
             {areas[areaType] && <PolygonsMapper area={areas[areaType]?.data!} onPlanDisplay={() => setPlanTripDisplayed(true)} />}
           </MapContainer>
         </Container>

@@ -7,6 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import {
   Button,
+  Card,
   CircularProgress,
   Container,
   Dialog,
@@ -15,12 +16,16 @@ import {
   DialogContentText,
   DialogTitle,
   Fab,
+  fade,
   Grid,
+  GridList,
   IconButton,
   makeStyles,
   Paper,
   Snackbar,
   TextField,
+  GridListTile,
+  GridListTileBar,
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import { useSelector } from "react-redux";
@@ -32,9 +37,25 @@ import { storage } from "../index";
 import Notfound from "./NotFound";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
+import LocationOnIcon from "@material-ui/icons/LocationOn";
+import { useWindowSize } from "../hooks/useWindowSize";
+import { getPhotoColumns, isMobileMode } from "../utils/helpers";
+import { IRatio } from "./Map";
 
 const useStyles = makeStyles((theme) => ({
-  title: {
+  mainContainer: {
+    minHeight: "85vh",
+    display: "flex",
+    flexWrap: "wrap",
+    paddingBottom: "2vh",
+    paddingTop: "5vh",
+    paddingLeft: "5px !important",
+    paddingRight: "5px !important",
+    backgroundColor: fade(theme.palette.secondary.main, 0.3),
+  },
+  tripTitle: {
+    paddingTop: "5px",
+    paddingBottom: "5px",
     color: theme.palette.primary.dark,
   },
   notchedOutline: {
@@ -43,28 +64,32 @@ const useStyles = makeStyles((theme) => ({
   input: {
     backgroundColor: "#ffffffad",
   },
+  tripDetailContainer: {
+    paddingLeft: "5px !important",
+    paddingRight: "5px !important",
+    maxWidth: (drawerSize: IRatio) => drawerSize.widthDialog,
+  },
+  galeryContainer: {
+    maxWidth: (drawerSize: IRatio) => drawerSize.widthMap,
+  },
+  tripCard: {
+    padding: "20px",
+    marginBottom: "10px",
+  },
   paper: {
+    backgroundColor: "#ffffffad",
     color: theme.palette.secondary.main,
-    width: "50%",
-    padding: "30px",
+    // width: "50%",
+    padding: "5px",
   },
   loader: { position: "fixed", left: "50%", top: "50%" },
   nameInput: {
     width: "50%",
   },
-  dateInput: {
-    width: "50%",
-    backgroundColor: "transparent",
-    borderStyle: "none",
-    fontSize: "24px",
-  },
   fab: {
     marginTop: "10px",
     height: "35px",
     width: "35px",
-  },
-  delete: {
-    backgroundColor: "#ff1744",
   },
   image: {
     width: "200px",
@@ -81,11 +106,14 @@ const useStyles = makeStyles((theme) => ({
   topMargin: {
     marginTop: "30px",
   },
+  photosTitle: {
+    padding: "5px",
+    flexWrap: "wrap",
+    display: "flex",
+  },
 }));
 
 const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
-  const classes = useStyles();
-
   const { uid } = useSelector((state: RootState) => state.firebase.auth);
   const [trip, setTrip] = useState<Trip>();
   const [name, setName] = useState<string>("");
@@ -97,9 +125,18 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
   const [pictures, setPictures] = useState<Array<string>>([]);
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [delPicture, setDelPicture] = useState<string>("");
 
   const firestore = useFirestore();
   const history = useHistory();
+
+  const windowSize = useWindowSize();
+  const mobileOn = isMobileMode(windowSize);
+
+  const size: IRatio = !mobileOn && windowSize.width !== undefined ? { widthDialog: "600px", widthMap: `${windowSize.width - 650}px` } : { widthDialog: "100%", widthMap: "100%" };
+  const classes = useStyles(size);
+
+  const GalleryColumns = getPhotoColumns(windowSize);
 
   useFirestoreConnect({
     collection: `users/${uid}/trips`,
@@ -151,12 +188,9 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
   };
 
-  const handleOpenDialog = () => {
+  const handleDelPictureDialog = (picture: string) => {
     setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+    setDelPicture(picture);
   };
 
   const onAddNoteClick = () => {
@@ -253,7 +287,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         console.log("delete fail ", error);
         throw new Error(error);
       });
-    handleCloseDialog();
+    setOpenDialog(false);
   };
 
   function getPathStorageFromUrl(url: String) {
@@ -272,122 +306,118 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
   return (
     <>
-      <Container maxWidth={false}>
+      <Container className={classes.mainContainer} maxWidth={false}>
         {!trip && <CircularProgress className={classes.loader} />}
         {trip && (
-          <Paper className={classes.paper}>
-            <Typography className={classes.title} variant="h5">
-              {trip.areaName} - {trip.name}
-            </Typography>
-            <Grid container direction={"column"}>
-              <Grid item>
-                <TextField
-                  InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
-                  label="Name"
-                  id="tripName"
-                  name="name"
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </Grid>
-              <Grid item>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <KeyboardDatePicker
-                    fullWidth
-                    margin="normal"
-                    inputVariant="outlined"
-                    id="date-picker"
-                    label="Date"
-                    format="MM/dd/yyyy"
-                    value={date}
-                    onChange={onDateChange}
-                    KeyboardButtonProps={{
-                      "aria-label": "change date",
-                    }}
-                    InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
-                  />
-                </MuiPickersUtilsProvider>
-              </Grid>
-              {/*Notes*/}
-              <Grid item>
-                <Typography variant="h6" align={"left"}>
-                  Notes
+          <>
+            <Container className={classes.tripDetailContainer}>
+              <Card className={classes.tripCard}>
+                <LocationOnIcon />
+                <Typography color="secondary" variant="h6" component="h1">
+                  {trip.areaName}
                 </Typography>
-                {notes.map((note, index) => (
-                  <TextField
-                    id={`Note ${index + 1}`}
-                    label={`Note ${index + 1}`}
-                    fullWidth={true}
-                    multiline
-                    variant="outlined"
-                    className={classes.note}
-                    value={note}
-                    onChange={(e) => onNoteChange(index, e)}
-                  />
-                ))}
-              </Grid>
-              {/*Add Note*/}
-              <Grid item>
-                <Fab onClick={onAddNoteClick} className={classes.fab}>
-                  <AddIcon />
-                </Fab>
-              </Grid>
-            </Grid>
-            {/* Pictures*/}
-            <Grid container direction={"column"}>
-              <Grid item>
-                <Typography variant={"h5"} align={"left"}>
+                <Paper className={classes.paper}>
+                  <Typography className={classes.tripTitle} color="secondary" variant="h5">
+                    {trip.name}
+                  </Typography>
+                </Paper>
+                <Grid container direction={"column"}>
+                  <Grid item>
+                    <TextField
+                      InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+                      label="Name"
+                      id="tripName"
+                      name="name"
+                      fullWidth
+                      margin="normal"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                      <KeyboardDatePicker
+                        fullWidth
+                        margin="normal"
+                        inputVariant="outlined"
+                        id="date-picker"
+                        label="Date"
+                        format="MM/dd/yyyy"
+                        value={date}
+                        onChange={onDateChange}
+                        KeyboardButtonProps={{
+                          "aria-label": "change date",
+                        }}
+                        InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+                      />
+                    </MuiPickersUtilsProvider>
+                  </Grid>
+                  {/*Notes*/}
+                  <Grid item>
+                    <Typography variant="h6" align={"left"}>
+                      Notes
+                    </Typography>
+                    {notes.map((note, index) => (
+                      <TextField id={`Note ${index + 1}`} label={`Note ${index + 1}`} fullWidth={true} multiline variant="outlined" className={classes.note} value={note} onChange={(e) => onNoteChange(index, e)} />
+                    ))}
+                  </Grid>
+                  {/*Add Note*/}
+                  <Grid item>
+                    <Fab onClick={onAddNoteClick} className={classes.fab}>
+                      <AddIcon />
+                    </Fab>
+                  </Grid>
+                </Grid>
+
+                {/*Delete and Save*/}
+                <Grid container className={classes.topMargin} direction={"row"} alignItems={"flex-start"} spacing={1}>
+                  <Grid item>
+                    <Button variant="contained" color="secondary" component="span" startIcon={<SaveIcon />} onClick={onSaveClick}>
+                      Save Changes
+                    </Button>
+                  </Grid>
+                  <Grid item>
+                    <Button variant="contained" color="primary" component="span" startIcon={<RemoveIcon />} onClick={onDeleteClick}>
+                      Delete Trip
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Card>
+            </Container>
+
+            <Container className={classes.galeryContainer}>
+              {/* Pictures*/}
+              <div className={classes.photosTitle}>
+                <Typography style={{ flex: 1 }} variant={"h5"} align={"left"}>
                   Photos
                 </Typography>
-                {pictures.map((picture, index) => (
-                  <Grid item>
-                    {/* <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => deletePicture(picture)}/> */}
-                    <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => handleOpenDialog()} />
-                    {/* Delete picture confirmation dialog  */}
-                    <Dialog open={openDialog} onClose={handleCloseDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                      <DialogTitle id="alert-dialog-title">{"Delete picture"}</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText id="alert-dialog-description">Are you sure you want to delete this picture?</DialogContentText>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={() => deletePicture(picture)} color="primary">
-                          Yes
-                        </Button>
-                        <Button onClick={handleCloseDialog} color="primary" autoFocus>
-                          No
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
-                  </Grid>
-                ))}
-
                 <Grid item>
                   <input accept="image/jpeg, image/png" className={classes.hiddenInput} id="icon-button-file" type="file" onChange={handleImageChange} />
                   <label htmlFor="icon-button-file">
-                    <Button variant="contained" color="default" component="span" startIcon={<CloudUploadIcon />}>
+                    <Button variant="contained" color="primary" component="span" startIcon={<CloudUploadIcon />}>
                       Upload
                     </Button>
                   </label>
                 </Grid>
-              </Grid>
-            </Grid>
-            {/*Delete and Save*/}
-            <Grid container className={classes.topMargin} direction={"row"} alignItems={"flex-start"} spacing={1}>
-              <Grid item>
-                <Button variant="contained" color="default" component="span" startIcon={<SaveIcon />} onClick={onSaveClick}>
-                  Save Changes
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button variant="contained" color="default" component="span" className={classes.delete} startIcon={<RemoveIcon />} onClick={onDeleteClick}>
-                  Delete Trip
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
+              </div>
+              <GridList cellHeight={160} cols={GalleryColumns}>
+                {pictures.map((picture, index) => (
+                  <GridListTile key={index} cols={1}>
+                    <img src={picture} />
+                    <GridListTileBar
+                      actionIcon={
+                        <IconButton onClick={() => handleDelPictureDialog(picture)}>
+                          <RemoveIcon color="primary" />
+                        </IconButton>
+                      }
+                    />
+                  </GridListTile>
+                ))}
+              </GridList>
+              {/*  */}
+            </Container>
+          </>
         )}
         {/*Saved info snackbar*/}
         <Snackbar
@@ -400,13 +430,15 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
           onClose={() => setSnackbarOpen(false)}
           message="Changes successfully saved."
           action={
-            <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
+            <IconButton size="small" aria-label="close" color="inherit">
               <CloseIcon fontSize="small" />
             </IconButton>
           }
         />
-        {/*Confirm delete dialog*/}
+        {/*Confirm delete trip dialog*/}
         <ConfirmDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} text={"Are you sure you want to delete the trip?"} />
+
+        <ConfirmDialog onConfirm={() => deletePicture(delPicture)} onCancel={() => setOpenDialog(false)} open={openDialog} text={"Are you sure you want to delete this picture?"} />
       </Container>
     </>
   );
