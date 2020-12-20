@@ -53,7 +53,6 @@ const WeatherWidget: React.FC<ReduxAndPropsType> = (props) => {
     } else {
       store.dispatch(reinitializeWeather(false));
     }
-    return () => console.log("Unmounting");
   }, [props.weather.reinitialize]);
 
   return (

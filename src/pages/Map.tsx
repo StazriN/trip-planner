@@ -89,7 +89,7 @@ const Map: FC<MapProps> = ({ areas, areaType }) => {
 
     store.dispatch(setClickedArea(undefined));
     setPlanTripDisplayed(false);
-  }, []);
+  }, [areaType]);
 
   const isSelectedAreaDownloading = () => {
     return !areas[areaType] && areas.isDownloading;

@@ -86,11 +86,6 @@ const useStyles = makeStyles((theme) => ({
     height: "35px",
     width: "35px",
   },
-  image: {
-    width: "200px",
-    height: "auto",
-    display: "block",
-  },
   note: {
     marginTop: "20px",
     backgroundColor: "#ffffffad",
@@ -106,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "wrap",
     display: "flex",
   },
-  imageGridListTile: {
+  image: {
     cursor: "pointer"
   }
 }));
@@ -301,8 +296,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         setPictures([...deleteFromPictures(picture)]);
       })
       .catch(function (error) {
-        console.log("delete fail ", error);
-        throw new Error(error);
+        console.log(error);
       });
     setOpenDialog(false);
   };
@@ -420,8 +414,8 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
               </div>
               <GridList cellHeight={160} cols={GalleryColumns}>
                 {pictures.map((picture, index) => (
-                  <GridListTile key={index} cols={1} className={classes.imageGridListTile} onClick={() => openPhotoInNewTab(picture)}>
-                    <img src={picture} alt={picture.split("/").pop()} />
+                  <GridListTile key={index} cols={1}>
+                    <img src={picture} alt={picture.split("/").pop()} className={classes.image} onClick={() => openPhotoInNewTab(picture)}/>
                     <GridListTileBar
                       actionIcon={
                         <IconButton onClick={() => handleDelPictureDialog(picture)}>
