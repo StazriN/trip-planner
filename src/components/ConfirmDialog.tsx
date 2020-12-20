@@ -1,6 +1,5 @@
 import React, { FC } from "react";
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from "@material-ui/core";
-import { useWindowSize } from "../hooks/useWindowSize";
 
 type ConfirmDeleteDialogProps = {
   onConfirm: () => void;

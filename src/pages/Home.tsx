@@ -1,4 +1,4 @@
-import { Button, Card, CardActionArea, CardActions, CardContent, CardMedia, Grid, makeStyles, Typography } from "@material-ui/core";
+import { Card, CardActionArea,  CardContent, CardMedia, Grid, makeStyles, Typography } from "@material-ui/core";
 import React, { FC } from "react";
 import bImg from "../assets/jpg/331643-Firewatch-sunset-forest-mountain.jpg";
 import { useHistory } from "react-router-dom";

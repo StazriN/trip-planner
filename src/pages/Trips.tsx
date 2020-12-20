@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import { Trip } from "../utils/types";
 import { Container, GridList, GridListTile, GridListTileBar, makeStyles } from "@material-ui/core";
 import TripPlaceholder from "../assets/jpg/TripPlaceholder.jpg";
@@ -43,39 +43,41 @@ const Trips: FC = () => {
     history.push(`/trip-detail/${id}`);
   };
 
-  const downloadImage = async (tripId: string) => {
-    const list = await storage.ref(`users/${uid}/images/${tripId}/`).listAll();
-    if (list.items.length > 0) {
-      const url = await list.items[0].getDownloadURL();
-      return { id: tripId, image: url };
-    }
-  };
 
-  useEffect(() => {
-    const downloadImagesAsync = async (allTrips: Trip[]) => {
-      const images: typeof tripsImages = [];
-
-      await Object.values(allTrips).reduce(async (promise, trip) => {
-        if (!trip) {
-          return;
-        }
-
-        await promise;
-        const image = await downloadImage(trip.id);
-        if (image) {
-          images.push(image);
-        }
-      }, Promise.resolve());
-
-      return images;
+  const downloadImagesAsync = useCallback(async (allTrips: Trip[]) => {
+    // Helper function
+    const downloadImage = async (tripId: string) => {
+      const list = await storage.ref(`users/${uid}/images/${tripId}/`).listAll();
+      if (list.items.length > 0) {
+        const url = await list.items[0].getDownloadURL();
+        return { id: tripId, image: url };
+      }
     };
 
+    const images: typeof tripsImages = [];
+
+    await Object.values(allTrips).reduce(async (promise, trip) => {
+      if (!trip) {
+        return;
+      }
+
+      await promise;
+      const image = await downloadImage(trip.id);
+      if (image) {
+        images.push(image);
+      }
+    }, Promise.resolve());
+
+    return images;
+  }, [uid]);
+
+  useEffect(() => {
     if (trips) {
       downloadImagesAsync(trips)
         .then((array) => setTripsImages(array))
         .catch((err) => console.log(err));
     }
-  }, [trips]);
+  }, [trips, downloadImagesAsync]);
 
   const windowSize = useWindowSize();
   const columns = getGridColumns(windowSize);
@@ -83,17 +85,17 @@ const Trips: FC = () => {
   return (
     <div className={classes.backgroundDiv}>
       <RSC>
+        {trips && Object.values(trips).length > 0 &&
         <Container>
           <GridList cellHeight={350} spacing={10} cols={columns}>
-            {trips &&
-              Object.values(trips).map((trip) => (
-                trip && <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
-                  <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
-                  <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>} />
-                </GridListTile>
-              ))}
+            {Object.values(trips).map((trip) => (
+              trip && <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
+                <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name}/>
+                <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>}/>
+              </GridListTile>
+            ))}
           </GridList>
-        </Container>
+        </Container>}
       </RSC>
     </div>
   );
