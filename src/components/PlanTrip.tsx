@@ -117,7 +117,8 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
           id: docRef.id,
         });
       })
-      .then(() => history.push("/"));
+      .then(() => history.push("/trips"))
+      .catch(err => console.log(err));
   };
 
   return (
@@ -150,8 +151,8 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
                   fullWidth
                   margin="normal"
                   inputVariant="outlined"
-                  id="date-picker-dialog"
-                  label="Date picker dialog"
+                  id="date-picker"
+                  label="Date"
                   format="MM/dd/yyyy"
                   value={date}
                   onChange={onDateChange}

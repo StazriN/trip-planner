@@ -4,36 +4,40 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 import CloseIcon from '@material-ui/icons/Close';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import {
+  Button,
   CircularProgress, Fab, Grid,
   IconButton,
-  makeStyles, Paper, Snackbar, TextareaAutosize, TextField
+  makeStyles, Paper, Snackbar, TextField
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { useFirestore, useFirestoreConnect } from "react-redux-firebase";
 import { useHistory } from "react-router-dom";
-import DatePicker from "react-datepicker";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import { storage } from '../index'
 import Notfound from "./NotFound";
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const useStyles = makeStyles(theme => ({
+  title: {
+    color: theme.palette.primary.dark,
+  },
+  notchedOutline: {
+    borderColor: theme.palette.primary.dark,
+  },
+  input: {
+    backgroundColor: "#ffffffad",
+  },
   paper: {
     color: theme.palette.secondary.main,
     width: '50%',
     padding: '30px'
   },
   loader: { position: 'fixed', left: '50%', top: '50%' },
-  dateInputContainer: {
-    border: '0px',
-    borderBottom: '1px',
-    borderStyle: 'solid',
-    height: '50px',
-    borderRadius: '0 10px 0 0',
-    align: 'center'
-  },
   nameInput: {
     width: '50%',
   },
@@ -43,10 +47,8 @@ const useStyles = makeStyles(theme => ({
     borderStyle: 'none',
     fontSize: '24px',
   },
-  note: {
-    width: '50%'
-  },
   fab: {
+    marginTop: "10px",
     height: '35px',
     width: '35px'
   },
@@ -57,6 +59,16 @@ const useStyles = makeStyles(theme => ({
     width: '200px',
     height: 'auto',
     display: 'block',
+  },
+  note: {
+    marginTop: "20px",
+    backgroundColor: "#ffffffad",
+  },
+  hiddenInput: {
+    display: 'none'
+  },
+  topMargin: {
+    marginTop: "30px"
   }
 }));
 
@@ -72,7 +84,6 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const [pictures, setPictures] = useState<Array<string>>([]);
-  const [file, setFile] = useState<File>();
   const [notFound, setNotFound] = useState<boolean>(false);
 
   const firestore = useFirestore();
@@ -87,14 +98,14 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
   useEffect(() => {
     if (trips) {
-      const trip = Object.values(trips).find(trip => trip.id === tripId)
+      const trip = Object.values(trips).find(trip => trip?.id === tripId)
       if (trip) {
         setTrip(trip)
       } else {
         setNotFound(true);
       }
     }
-  }, [tripId, trips])
+  }, [trips, tripId])
 
   useEffect(() => {
     const downloadImagesAsync = async (tripId: string) => {
@@ -120,6 +131,10 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     }
   }, [trip, uid]);
 
+  const onDateChange = (date: Date | null) => {
+    setDate(date ?? new Date());
+  };
+
   const onNoteChange = (index: number, e: any) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
   };
@@ -133,14 +148,13 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
       return
     }
 
-    handleUpload();
-
     firestore
       .collection('users')
       .doc(uid)
       .collection('trips')
       .doc(trip.id)
       .update({
+        name,
         date,
         notes,
       }).then(() => {
@@ -153,17 +167,14 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   }
 
   function handleImageChange(e: any) {
-    setFile(e.target.files[0]);
-  }
-
-  function handleUpload() {
+    const file = e.target.files[0];
     if (!file || !trip) {
-      return
+      return;
     }
 
     storage.ref(`/users/${uid}/images/${trip.id}/${file.name}`)
       .put(file)
-      .on("state_changed", console.log, console.error, () => {
+      .on("state_changed", console.log, console.error, () =>setTimeout(() => {
         storage
           .ref("users")
           .child(uid)
@@ -172,13 +183,16 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
           .child(file.name)
           .getDownloadURL()
           .then((url) => {
-            setFile({} as File)
             setPictures([...pictures, url])
-          });
-      });
+          })
+          .catch(err => console.log(err));
+      }, 1000));
   }
 
   const onDeleteConfirm = () => {
+    setTrip(undefined);
+    setConfirmDeleteOpen(false);
+
     firestore
       .collection('users')
       .doc(uid)
@@ -192,10 +206,6 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     setConfirmDeleteOpen(false)
   }
 
-  const onSnackbarClose = () => {
-    setSnackbarOpen(false)
-  }
-
   // Trip not found
   if (notFound) {
     return <Notfound />
@@ -206,27 +216,57 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
       {!trip && <CircularProgress className={classes.loader} />}
       {trip &&
       <Paper className={classes.paper}>
-        <Typography variant={'h4'}>
-          {trip.name} - {trip.areaName}
+        <Typography className={classes.title} variant="h5">
+          {trip.areaName} - {trip.name}
         </Typography>
         <Grid container direction={'column'}>
           <Grid item>
-            <Typography variant={'h5'} align={'left'}>Name:</Typography>
-            <TextField value={name} className={classes.nameInput} onChange={(e) => setName(e.target.value)} />
+            <TextField
+              InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+              label="Name"
+              id="tripName"
+              name="name"
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </Grid>
           <Grid item>
-            <Typography variant={'h5'} align={'left'}>Trip Date:</Typography>
-            <Grid item className={classes.dateInputContainer}>
-              <DatePicker className={classes.dateInput} selected={date} onChange={(date: Date | null) => setDate(date ?? new Date())} />
-            </Grid>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <KeyboardDatePicker
+                fullWidth
+                margin="normal"
+                inputVariant="outlined"
+                id="date-picker"
+                label="Date"
+                format="MM/dd/yyyy"
+                value={date}
+                onChange={onDateChange}
+                KeyboardButtonProps={{
+                  "aria-label": "change date",
+                }}
+                InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+              />
+            </MuiPickersUtilsProvider>
           </Grid>
           {/*Notes*/}
           <Grid item>
-            <Typography variant={'h5'} align={'left'}>Notes:</Typography>
+            <Typography variant="h6" align={"left"}>
+              Notes
+            </Typography>
             {notes.map((note, index) => (
-              <Grid item>
-                <TextareaAutosize className={classes.note} aria-label="empty textarea" rowsMin={3} placeholder="Empty" value={note} onChange={(e) => onNoteChange(index, e)} />
-              </Grid>
+              <TextField
+                id={`Note ${index + 1}`}
+                label={`Note ${index + 1}`}
+                fullWidth={true}
+                multiline
+                variant="outlined"
+                className={classes.note}
+                value={note}
+                onChange={(e) => onNoteChange(index, e)}
+              />
             ))}
           </Grid>
           {/*Add Note*/}
@@ -236,45 +276,54 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
             </Fab>
           </Grid>
         </Grid>
-        {/* Pictures Preview*/}
-        {pictures.length > 0 &&
+        {/* Pictures*/}
         <Grid container direction={'column'}>
           <Grid item>
-            <Typography variant={'h5'} align={'left'}>Pictures:</Typography>
-            {/* {imageUrls.map((url) => (
-                  <Typography variant={'h5'} align={'left'}>{url}</Typography>
-                ))} */}
-            {pictures.map((picture) => (
+            <Typography variant={'h5'} align={'left'}>Photos</Typography>
+            {pictures.map((picture, index) => (
               <Grid item>
-                <img className={classes.image} src={`${picture}`} height={200} width={200} />
+                <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} />
               </Grid>
-            ))
-            }
-          </Grid>
-        </Grid>
-        }
-        {/* Add Pictures */}
-        <Grid container direction="row">
-          <Grid item>
-            <Typography variant={'h5'} align={'left'}>Upload Picture:</Typography>
+            ))}
             <Grid item>
-              <form>
-                <input type="file" onChange={handleImageChange} />
-              </form>
+              <input accept="image/jpeg, image/png" className={classes.hiddenInput} id="icon-button-file" type="file" onChange={handleImageChange} />
+              <label htmlFor="icon-button-file">
+                <Button
+                  variant="contained"
+                  color="default"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                >
+                  Upload
+                </Button>
+              </label>
             </Grid>
           </Grid>
         </Grid>
         {/*Delete and Save*/}
-        <Grid container alignItems={'flex-start'} spacing={1}>
+        <Grid container className={classes.topMargin} direction={"row"} alignItems={"flex-start"} spacing={1}>
           <Grid item>
-            <Fab onClick={onSaveClick}>
-              <SaveIcon />
-            </Fab>
+            <Button
+              variant="contained"
+              color="default"
+              component="span"
+              startIcon={<SaveIcon />}
+              onClick={onSaveClick}
+            >
+              Save Changes
+            </Button>
           </Grid>
           <Grid item>
-            <Fab onClick={onDeleteClick} className={classes.delete}>
-              <RemoveIcon />
-            </Fab>
+              <Button
+                variant="contained"
+                color="default"
+                component="span"
+                className={classes.delete}
+                startIcon={<RemoveIcon />}
+                onClick={onDeleteClick}
+              >
+                Delete Trip
+              </Button>
           </Grid>
         </Grid>
       </Paper>}
@@ -286,14 +335,12 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         }}
         open={snackbarOpen}
         autoHideDuration={6000}
-        onClose={onSnackbarClose}
+        onClose={() => setSnackbarOpen(false)}
         message="Changes successfully saved."
         action={
-          <>
-            <IconButton size="small" aria-label="close" color="inherit" onClick={onSnackbarClose}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </>
+          <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
         }
       />
       {/*Confirm delete dialog*/}

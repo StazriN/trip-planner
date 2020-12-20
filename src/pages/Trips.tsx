@@ -56,6 +56,10 @@ const Trips: FC = () => {
       const images: typeof tripsImages = [];
 
       await Object.values(allTrips).reduce(async (promise, trip) => {
+        if (!trip) {
+          return;
+        }
+
         await promise;
         const image = await downloadImage(trip.id);
         if (image) {
@@ -83,7 +87,7 @@ const Trips: FC = () => {
           <GridList cellHeight={350} spacing={10} cols={columns}>
             {trips &&
               Object.values(trips).map((trip) => (
-                <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
+                trip && <GridListTile className={classes.gridItem} key={trip.id} onClick={() => onTripDetailClick(trip.id)}>
                   <img src={tripsImages.find((item) => item.id === trip.id)?.image ?? TripPlaceholder} alt={trip.name} />
                   <GridListTileBar title={trip.name} subtitle={<span>{trip.date?.toDate().toDateString()}</span>} />
                 </GridListTile>
