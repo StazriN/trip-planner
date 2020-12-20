@@ -111,9 +111,9 @@ const Home: FC = () => {
         Plan your trip, write down notes, store memories and much more with Trip Planner!
       </Typography>
       <Grid container spacing={5} justify={"center"} className={classes.gridContainer} alignItems={"stretch"}>
-        {getAreas().map((areaCard) => {
+        {getAreas().map((areaCard, index) => {
           return (
-            <Grid className={classes.gridItem} item md={4} sm={6}>
+            <Grid key={index} className={classes.gridItem} item md={4} sm={6}>
               <Card className={classes.card}>
                 <CardActionArea className={classes.cardActions} onClick={areaCard.onSelect}>
                   <CardMedia className={classes.media} image={areaCard.image} title="Contemplative Reptile" />

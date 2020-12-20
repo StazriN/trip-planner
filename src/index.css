@@ -3,7 +3,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: url("./assets/jpg/331643-Firewatch-sunset-forest-mountain.jpg") no-repeat center top, #211023;
+  background-color: #211023;
+  background: url("./assets/jpg/331643-Firewatch-sunset-forest-mountain.jpg") fixed no-repeat center top, #211023;
   background-size: cover;
 }
 

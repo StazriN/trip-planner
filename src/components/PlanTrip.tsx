@@ -18,7 +18,7 @@ import DoneIcon from "@material-ui/icons/Done";
 import CloudIcon from "@material-ui/icons/Cloud";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
 import { isMobileMode } from "../utils/helpers";
-import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert from "@material-ui/lab/Alert";
 
 const useStyles = makeStyles((theme) => ({
   notchedOutline: {
@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "5px",
   },
   areaTitle: {
+    paddingTop: "10px",
     color: theme.palette.primary.dark,
   },
 
@@ -194,16 +195,16 @@ const PlanTrip: React.FC<PlanTripProps> = ({ areas, onClose }) => {
       </Card>
       <Snackbar
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
+          vertical: "bottom",
+          horizontal: "left",
         }}
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-          >
-            <MuiAlert severity="error" elevation={6} variant="filled" onClose={() => setSnackbarOpen(false)} >
-              Please fill trip name and date properly.
-            </MuiAlert>
+      >
+        <MuiAlert severity="error" elevation={6} variant="filled" onClose={() => setSnackbarOpen(false)}>
+          Please fill trip name and date properly.
+        </MuiAlert>
       </Snackbar>
     </>
   );

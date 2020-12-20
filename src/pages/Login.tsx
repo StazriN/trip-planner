@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 import { useHistory } from "react-router-dom";
-
+import Avatar from "@material-ui/core/Avatar";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
@@ -10,16 +10,30 @@ import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import { useFirebase } from "react-redux-firebase";
 import { makeStyles } from "@material-ui/core";
+import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
   filledInput: {
     backgroundColor: theme.palette.primary.light,
+  },
+  avatar: {
+    margin: "4px auto",
+    backgroundColor: theme.palette.secondary.main,
   },
 }));
 
 const Login: FC = () => {
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [surname, setSurname] = useState<string>("");
+  const [newUser, setNewUser] = useState<boolean>(false);
 
   // Since firebase returns informative error messages we can show them directly
   const [error, setError] = useState<string>();
@@ -48,11 +62,15 @@ const Login: FC = () => {
       });
 
   const classes = useStyles();
+
   return (
-    <Card>
+    <Card className={classes.root}>
       <CardContent>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
         <Typography variant="h5" component="h1">
-          Sign in
+          {newUser ? "Sign up" : "Sign in"}
         </Typography>
         <Typography variant="subtitle1">Use your Account</Typography>
         <TextField

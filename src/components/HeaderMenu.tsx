@@ -1,5 +1,5 @@
 import { AppBar, Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import PersonIcon from "@material-ui/icons/Person";
 import React, { useEffect, useState } from "react";
 import { IWindowSize, useWindowSize } from "../hooks/useWindowSize";
@@ -16,6 +16,8 @@ import WeatherWidget from "./WeatherWidget";
 import HomeIcon from "@material-ui/icons/Home";
 import ExploreIcon from "@material-ui/icons/Explore";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
+import ConfirmDialog from "./ConfirmDialog";
+import { LogInDialog } from "./LogInDialog";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -55,11 +57,14 @@ type HeaderMenuProps = ReturnType<typeof mapStateToProps> & {};
 
 const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   const [loginButton, setLoginButton] = useState<string | null>();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState<boolean>(false);
+  const [logInDialogOpen, setLogInDialogOpen] = useState<boolean>(false);
+
+  const history = useHistory();
 
   const windowSize = useWindowSize();
   const drawerSize = {
     width: windowSize.width !== undefined && windowSize.width > 500 ? 300 : windowSize.width,
-    //height: windowSize.height != undefined && windowSize.height > 500 ? 300 : windowSize.height,
   };
   const classes = useStyles(drawerSize);
 
@@ -77,8 +82,13 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   }, [uid, displayName, nameToDisplay, email]);
 
   const firebase = useFirebase();
+
   // Sign out handler
-  const signOut = () => firebase.auth().signOut();
+  const onSignOut = () => {
+    firebase.auth().signOut();
+    setLogoutDialogOpen(false);
+    history.push("/");
+  };
 
   //
   const menuList: MenuItemsType = {
@@ -95,12 +105,17 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
       <AppBar className={classes.appBar} position="static">
         <Toolbar>
           {uid && (
-            <IconButton onMouseEnter={() => setLoginButton("Logout")} onMouseLeave={() => setLoginButton(nameToDisplay)} color="secondary" onClick={() => signOut()}>
+            <IconButton
+              onMouseEnter={() => setLoginButton("Logout")}
+              onMouseLeave={() => setLoginButton(nameToDisplay)}
+              color="secondary"
+              onClick={() => setLogoutDialogOpen(true)}
+            >
               <ExitToApp />
             </IconButton>
           )}
-          <Link className={classes.link} onClick={(event) => uid && event.preventDefault()} to="/login">
-            <Button className={classes.login} color="secondary" startIcon={<PersonIcon />} onClick={() => {}}>
+          <Link className={classes.link} onClick={(event) => event.preventDefault()} to="/">
+            <Button className={classes.login} color="secondary" startIcon={<PersonIcon />} onClick={() => !uid && setLogInDialogOpen(true)}>
               {uid ? loginButton : "Login"}
             </Button>
           </Link>
@@ -168,6 +183,8 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
           <WeatherWidget />
         )}
       </Drawer>
+      <ConfirmDialog onConfirm={onSignOut} onCancel={() => setLogoutDialogOpen(false)} open={logoutDialogOpen} text={"Are you sure you want to sign out?"} />
+      <LogInDialog open={logInDialogOpen} onClose={() => setLogInDialogOpen(false)} />
     </>
   );
 };
