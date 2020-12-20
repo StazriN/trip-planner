@@ -10,11 +10,6 @@ import {
   Card,
   CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Fab,
   fade,
   Grid,
@@ -326,7 +321,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
                     <TextField
                       InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
                       label="Name"
-                      id="tripName"
+                      key="tripName"
                       name="name"
                       fullWidth
                       margin="normal"
@@ -341,7 +336,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
                         fullWidth
                         margin="normal"
                         inputVariant="outlined"
-                        id="date-picker"
+                        key="date-picker"
                         label="Date"
                         format="MM/dd/yyyy"
                         value={date}
@@ -404,7 +399,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
               <GridList cellHeight={160} cols={GalleryColumns}>
                 {pictures.map((picture, index) => (
                   <GridListTile key={index} cols={1}>
-                    <img src={picture} />
+                    <img src={picture} alt={picture.split("/").pop()} />
                     <GridListTileBar
                       actionIcon={
                         <IconButton onClick={() => handleDelPictureDialog(picture)}>
