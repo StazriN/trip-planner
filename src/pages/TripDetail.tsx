@@ -7,7 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import {
   Button,
-  CircularProgress, Fab, Grid,
+  CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid,
   IconButton,
   makeStyles, Paper, Snackbar, TextField
 } from "@material-ui/core";
@@ -82,6 +82,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
   const [notes, setNotes] = useState<Array<string>>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [openDialog, setOpenDialog] = React.useState(false);
 
   const [pictures, setPictures] = useState<Array<string>>([]);
   const [notFound, setNotFound] = useState<boolean>(false);
@@ -139,6 +140,14 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     setNotes([...notes.slice(0, index), e.target.value, ...notes.slice(index + 1)]);
   };
 
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   const onAddNoteClick = () => {
     setNotes(notes.concat(""));
   };
@@ -158,8 +167,8 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
         date,
         notes,
       }).then(() => {
-      setSnackbarOpen(true)
-    })
+        setSnackbarOpen(true)
+      })
   };
 
   const onDeleteClick = () => {
@@ -174,7 +183,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
 
     storage.ref(`/users/${uid}/images/${trip.id}/${file.name}`)
       .put(file)
-      .on("state_changed", console.log, console.error, () =>setTimeout(() => {
+      .on("state_changed", console.log, console.error, () => setTimeout(() => {
         storage
           .ref("users")
           .child(uid)
@@ -223,6 +232,7 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
       console.log('delete fail ', error);
       throw new Error(error);
     });
+    handleCloseDialog();
   }
 
   function getPathStorageFromUrl(url: String) {
@@ -243,105 +253,129 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
     <>
       {!trip && <CircularProgress className={classes.loader} />}
       {trip &&
-      <Paper className={classes.paper}>
-        <Typography className={classes.title} variant="h5">
-          {trip.areaName} - {trip.name}
-        </Typography>
-        <Grid container direction={'column'}>
-          <Grid item>
-            <TextField
-              InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
-              label="Name"
-              id="tripName"
-              name="name"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Grid>
-          <Grid item>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
+        <Paper className={classes.paper}>
+          <Typography className={classes.title} variant="h5">
+            {trip.areaName} - {trip.name}
+          </Typography>
+          <Grid container direction={'column'}>
+            <Grid item>
+              <TextField
+                InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+                label="Name"
+                id="tripName"
+                name="name"
                 fullWidth
                 margin="normal"
-                inputVariant="outlined"
-                id="date-picker"
-                label="Date"
-                format="MM/dd/yyyy"
-                value={date}
-                onChange={onDateChange}
-                KeyboardButtonProps={{
-                  "aria-label": "change date",
-                }}
-                InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
-              />
-            </MuiPickersUtilsProvider>
-          </Grid>
-          {/*Notes*/}
-          <Grid item>
-            <Typography variant="h6" align={"left"}>
-              Notes
-            </Typography>
-            {notes.map((note, index) => (
-              <TextField
-                id={`Note ${index + 1}`}
-                label={`Note ${index + 1}`}
-                fullWidth={true}
-                multiline
                 variant="outlined"
-                className={classes.note}
-                value={note}
-                onChange={(e) => onNoteChange(index, e)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
-            ))}
-          </Grid>
-          {/*Add Note*/}
-          <Grid item>
-            <Fab onClick={onAddNoteClick} className={classes.fab}>
-              <AddIcon />
-            </Fab>
-          </Grid>
-        </Grid>
-        {/* Pictures*/}
-        <Grid container direction={'column'}>
-          <Grid item>
-            <Typography variant={'h5'} align={'left'}>Photos</Typography>
-            {pictures.map((picture, index) => (
-              <Grid item>
-                <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => deletePicture(picture)}/>
-              </Grid>
-            ))}
+            </Grid>
             <Grid item>
-              <input accept="image/jpeg, image/png" className={classes.hiddenInput} id="icon-button-file" type="file" onChange={handleImageChange} />
-              <label htmlFor="icon-button-file">
-                <Button
-                  variant="contained"
-                  color="default"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                >
-                  Upload
-                </Button>
-              </label>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <KeyboardDatePicker
+                  fullWidth
+                  margin="normal"
+                  inputVariant="outlined"
+                  id="date-picker"
+                  label="Date"
+                  format="MM/dd/yyyy"
+                  value={date}
+                  onChange={onDateChange}
+                  KeyboardButtonProps={{
+                    "aria-label": "change date",
+                  }}
+                  InputProps={{ className: classes.input, classes: { notchedOutline: classes.notchedOutline } }}
+                />
+              </MuiPickersUtilsProvider>
+            </Grid>
+            {/*Notes*/}
+            <Grid item>
+              <Typography variant="h6" align={"left"}>
+                Notes
+            </Typography>
+              {notes.map((note, index) => (
+                <TextField
+                  id={`Note ${index + 1}`}
+                  label={`Note ${index + 1}`}
+                  fullWidth={true}
+                  multiline
+                  variant="outlined"
+                  className={classes.note}
+                  value={note}
+                  onChange={(e) => onNoteChange(index, e)}
+                />
+              ))}
+            </Grid>
+            {/*Add Note*/}
+            <Grid item>
+              <Fab onClick={onAddNoteClick} className={classes.fab}>
+                <AddIcon />
+              </Fab>
             </Grid>
           </Grid>
-        </Grid>
-        {/*Delete and Save*/}
-        <Grid container className={classes.topMargin} direction={"row"} alignItems={"flex-start"} spacing={1}>
-          <Grid item>
-            <Button
-              variant="contained"
-              color="default"
-              component="span"
-              startIcon={<SaveIcon />}
-              onClick={onSaveClick}
-            >
-              Save Changes
-            </Button>
+          {/* Pictures*/}
+          <Grid container direction={'column'}>
+            <Grid item>
+              <Typography variant={'h5'} align={'left'}>Photos</Typography>
+              {pictures.map((picture, index) => (
+                <Grid item>
+                  {/* <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => deletePicture(picture)}/> */}
+                  <img className={classes.image} id={picture} alt={picture} src={picture} height={200} width={200} onClick={() => handleOpenDialog()} />
+                  {/* Delete picture confirmation dialog  */}
+                  <Dialog
+                    open={openDialog}
+                    onClose={handleCloseDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">{"Delete picture"}</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this picture?
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => deletePicture(picture)} color="primary">
+                        Yes
+                      </Button>
+                      <Button onClick={handleCloseDialog} color="primary" autoFocus>
+                        No
+                    </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Grid>
+              ))}
+
+              <Grid item>
+                <input accept="image/jpeg, image/png" className={classes.hiddenInput} id="icon-button-file" type="file" onChange={handleImageChange} />
+                <label htmlFor="icon-button-file">
+                  <Button
+                    variant="contained"
+                    color="default"
+                    component="span"
+                    startIcon={<CloudUploadIcon />}
+                  >
+                    Upload
+                </Button>
+                </label>
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid item>
+          {/*Delete and Save*/}
+          <Grid container className={classes.topMargin} direction={"row"} alignItems={"flex-start"} spacing={1}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="default"
+                component="span"
+                startIcon={<SaveIcon />}
+                onClick={onSaveClick}
+              >
+                Save Changes
+            </Button>
+            </Grid>
+            <Grid item>
               <Button
                 variant="contained"
                 color="default"
@@ -352,9 +386,9 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
               >
                 Delete Trip
               </Button>
+            </Grid>
           </Grid>
-        </Grid>
-      </Paper>}
+        </Paper>}
       {/*Saved info snackbar*/}
       <Snackbar
         anchorOrigin={{
@@ -373,6 +407,8 @@ const TripDetail: FC<{ tripId: string }> = ({ tripId }) => {
       />
       {/*Confirm delete dialog*/}
       <ConfirmDeleteDialog onConfirm={onDeleteConfirm} onCancel={onDeleteCancel} open={confirmDeleteOpen} />
+
+
     </>
   );
 }
